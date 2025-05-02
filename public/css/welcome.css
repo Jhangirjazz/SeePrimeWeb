@@ -1,3 +1,10 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #000; /* ensures full black backdrop */
+  overflow-x: hidden;
+}
+
 .video-wrapper {
     position: relative;
     width: 100%;
@@ -91,12 +98,14 @@ footer {
   }
   
   .footer-column a {
+    text-decoration: none;
     color: #999;
     transition: color 0.3s ease;
   }
   
   .footer-column a:hover {
     color: #ff3366;
+    text-decoration: underline;
   }
   
   
@@ -266,5 +275,246 @@ footer {
   .navbar-nav .nav-link.active {
     color: #ff3366 !important; /* Active link color */
   }
+
+  .logout-btn {
+    text-decoration: none;
+    color: white;
+  }
   
+  .card {
+    height: 100%; /* ensure full height usage */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-img-top {
+    height: 280px; /* make images taller */
+    object-fit: fill;
+}
+
+.card-body {
+    padding: 10px;
+    background-color: #1d1f20;
+    min-height: 10px; /* reduce height of text area */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+ 
+.card-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.hero-banner h1 {
+  font-size: 3rem;
+  line-height: 1.2;
+}
+
+.hero-banner {
+  margin-bottom: 0 !important;
+  padding-bottom: 1rem;  
+  background: linear-gradient(to right, rgba(0,0,0,0.9) 25%, rgba(0,0,0,0.1) 100%);
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  padding-left: 6%;
+}
+
+.hero-banner p {
+  font-size: 1.2rem;
+  color: #ddd;
+}
+
+.trailer-play-btn {
+  position: absolute;
+  top: 50%;
+  right: 4%;
+  transform: translateY(-50%);
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.trailer-play-btn .circle {
+  width: 50px;
+  height: 50px;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.trailer-play-btn .circle i {
+  font-size: 16px;
+}
+
+.trailer-play-btn:hover .circle {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.trailer-play-btn .text {
+  font-size: 14px;
+  color: white;
+}
+
+.category-section {
+  padding: 20px 0;
+  margin: 0;
+  width: 100%;
+  background-color: #000;
+}
+
+.category-section h5 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 20px;
+  color: #ff3366;
+}
+
+.scroll-container {
+  display: flex; /* 💥 this makes cards inline */
+  scroll-behavior: smooth;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 10px 0;
+  margin: 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+.content-card {
+  flex: 0 0 auto;
+  width: 400px;
+  height: 300px;
+  margin-right: 12px;
+  transition: transform 0.3s ease;
+  border-radius: 4px;
+}
+
+.content-card:hover {
+  transform: scale(1.05);
+}
+
+.content-card img {
+  height: 75%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+
+.content-card p {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-controls {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 5; 
+}
+
+.slider-wrapper {
+  position: relative;
+  padding: 0 40px;
+}
+
+.scroll-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.scroll-btn:hover {
+  background-color: #c10000;
+}
+
+.scroll-btn {
+  background-color: rgba(255, 0, 0, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+img {
+  object-fit: contain;
+  aspect-ratio: 16/9;
+}
+
+.featured-title {
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+}
+
+.watch-now-btn {
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 30px;
+  padding: 12px 28px;
+  background-color: #e50914;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+.watch-now-btn:hover {
+  background-color: #ff0f1f;
+  transform: scale(1.05);
+}
+
+.footer-column a,
+.footer-contact a {
+  text-decoration: none;
+  color: #999;
+}
+
+.footer-column a:hover,
+.footer-contact a:hover {
+  color: #ff3366;
+  text-decoration: underline; /* Optional */
+}
+
+
+
+
   

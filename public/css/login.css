@@ -1,0 +1,78 @@
+
+  .login-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: url('../images/Login.png') no-repeat center center/cover;
+    overflow: hidden;
+  }
+  
+  .login-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-form {
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    color: #fff;
+  }
+  
+  .login-form img {
+    width: 80px;
+    margin-bottom: 20px;
+  }
+  
+  .login-form input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 14px;
+  }
+  
+  .login-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #e10066; /* Magenta pink */
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+  
+  .login-form button:hover {
+    background-color: #c3005b;
+  }
+  
+  .login-form .forgot-password {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #ccc;
+    display: block;
+    text-decoration: none;
+  }
+  
+  .login-form .create-account {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #ccc;
+  }
+  
+  .login-form .create-account a {
+    color: #ff007f;
+    text-decoration: none;
+  }
+  

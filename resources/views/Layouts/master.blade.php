@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title')</title> 
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>@yield('title')</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">  
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
 </head>
+@stack('scripts')
+
 <body> 
     
     <nav class="navbar navbar-expand-lg navbar-dark ">
@@ -20,7 +28,7 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href={{ url('/') }} style="color: white !important; " >Start</a>
+                <a class="nav-link active" aria-current="page" href={{ url('/welcome') }} style="color: white !important; " >Start</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href={{ url('/shows') }} style="color: white !important; " >Shows</a>
@@ -46,24 +54,35 @@
       
             <!-- Search Icon + Bell + User -->
             <div class="d-flex align-items-center gap-3">
-  <!-- Search Icon (with toggle) -->
-  <a href="#" class="text-white" id="searchToggle"><i class="bi bi-search"></i></a>
 
-  <!-- Hidden Search Box -->
-  <form class="d-flex" id="searchForm" style="display: none;">
-    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-  </form>
+  
+  <!-- User Icon or Logout Button -->
 
-  <!-- Bell Icon -->
-  <a href="#" class="text-white"><i class="bi bi-bell"></i></a>
 
-  <!-- User Icon -->
-  <a href="#" class="text-white">
-    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
-      <i class="bi bi-person"></i>
+  <div class="d-flex align-items-center gap-3 ms-auto header-actions">
+    <!-- Search box -->
+    <div class="d-flex align-items-center bg-white px-2 rounded search-wrapper">
+      <i class="fas fa-search text-dark"></i>
+      <input type="text" class="form-control border-0 ms-2 shadow-none" placeholder="Search" style="width: 180px;">
     </div>
-  </a>
-</div>
+  
+    <!-- Notification icon -->
+    <a href="#" class="text-white fs-5">
+      <i class="fas fa-bell"></i>
+    </a>
+  
+    <!-- Logout or User -->
+    @if(session()->has('user_id'))
+      <a href="{{ url('/logout') }}" class="btn btn-danger btn-sm">Logout</a>
+    @else
+      <a href="{{ url('/') }}" class="text-white">
+        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
+          <i class="bi bi-person-circle"></i>
+        </div>
+      </a>
+    @endif
+  </div>
+  
       
           </div>
         </div>
@@ -87,14 +106,14 @@
           <div class="footer-logo-section">
             <div class="logo footer-logo">
               <a href="#">
-                <img src="{{ asset('images/logo.png') }}" alt="SEEPRIME Logo" width="100">
+                <img src="{{ asset('images/logo.png') }}" alt="SEEPRIME Logo" width="100" height="70" >
               </a>
             </div>
             
             <div class="footer-contact">
-              <p>Email: uscustomer@streamit.com</p>
-              <p class="contact-title">COSTUMER SERVICES</p>
-              <p class="phone">+ (480) 555-0103</p>
+              <p class="text-white"><a href="mailto:uscustomer@streamit.com" class="text-white">Email: uscustomer@streamit.com</a></p>
+              <p class="contact-title">CUSTOMER SERVICES</p>
+              <p class="phone"><a href="tel:(480) 555-0103" class="text-white">+ (480) 555-0103</a></p>
             </div>
           </div>
           
