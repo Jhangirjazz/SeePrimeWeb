@@ -11,27 +11,47 @@ class PageController extends Controller
 
     public function welcome()
 {
-    $apiUrl = "http://3.109.176.31/SeePrime/APIS/SELECT.php?select_id=select_content&admin_portal=Y";
+    $apiUrl = "http://15.184.102.5/SeePrime/APIS/SELECT.php?select_id=select_content&admin_portal=Y";
     $response = Http::get($apiUrl);
 
     if ($response->successful()) {
         $data = $response->json();
 
         $featured = $data[0] ?? null;
-
-        // Group by CONTENT_TYPE
         $grouped = collect($data)->groupBy('CONTENT_TYPE');
 
-        return view('welcome', [
-            'featured' => $featured,
-            'grouped' => $grouped
-        ]);
+        $top10 = collect($data)
+    ->take(10)
+    ->map(function ($item, $index) {
+        $thumb = $item['THUMBNAIL_PATH'] ?? null;
+        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+
+        if ($thumb && str_ends_with($thumb, '.jpg')) {
+            $thumbUrl = "http://15.184.102.5/SeePrime/Content/Images/{$thumb}";
+        } elseif ($source === 'youtube' && $thumb) {
+            $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
+        } else {
+            $thumbUrl = asset('images/default.jpg');
+        }
+
+        return [
+            'rank' => $index + 1,
+            'title' => $item['TITLE'] ?? 'Untitled',
+            'thumbnail_url' => $thumbUrl,
+            'views' => !empty($item['VIEWS']) ? $item['VIEWS'] . ' VIEWS' : '',
+            'content_id' => $item['CONTENT_ID'] ?? null,   // ✅ Add this
+        ];
+    })->toArray();
+        
     }
 
     return view('welcome', [
-        'featured' => null,
-        'grouped' => collect()
+        'featured' => $featured,
+        'grouped' => $grouped,
+        'top10' => $top10
     ]);
+    
+      
 }
 
     
@@ -75,7 +95,7 @@ class PageController extends Controller
     $username = $request->username;
     $password = $request->password;
 
-    $apiUrl = "http://3.109.176.31/SeePrime/APIS/SELECT.php?select_id=select_users_by_name_and_pass&admin_portal=N&username={$username}&password={$password}";
+    $apiUrl = "http://15.184.102.5/SeePrime/APIS/SELECT.php?select_id=select_users_by_name_and_pass&admin_portal=N&username={$username}&password={$password}";
 
     $response = Http::get($apiUrl);
 
@@ -93,11 +113,13 @@ class PageController extends Controller
 
             return redirect('/welcome');
         } else {
-            return back()->with('error','Invalid Username or Password');
+            return back()->with('error', $data['message'] ?? 'Invalid Username or Password');
         }
     } else {
         return back()->with('error' , 'Unable to connect to server.');
     }
+
+   
 
     }
 
@@ -115,32 +137,53 @@ class PageController extends Controller
         return redirect('/');
     }
 
-    public function playVideo($id)
+    
+
+    public function playVideo($id, $partId = null)
     {
-        $apiUrl = "http://3.109.176.31/SeePrime/APIS/SELECT.php?select_id=content_detail&content_id={$id}&admin_portal=N";
+        $apiUrl = "http://15.184.102.5/SeePrime/APIS/SELECT.php?select_id=content_detail&content_id={$id}&admin_portal=Y";
         $response = Http::get($apiUrl);
+    
+        if (!session()->has('user_id')) {
+            return redirect('/welcome')->with('toast', 'Please register yourself to access content.');
+        }
     
         if ($response->successful()) {
             $data = $response->json();
-            $video = is_array($data) && isset($data[0]) ? $data[0] : $data;
     
-            if (!empty($video)) {
-                // Normalize SOURCE
-                if (empty($video['SOURCE']) && !empty($video['SOURCE_PATH'])) {
-                    $video['SOURCE'] = $video['SOURCE_PATH'];
-                }
+            $isMultiPart = is_array($data) && isset($data[0]) && isset($data[0]['CONTENT_ID']);
+            $episodes = [];
+            $video = [];
     
-                return view('play', compact('video'));
+            if ($isMultiPart) {
+                $episodes = $data;
+    
+                $meta = $episodes[0];
+                $selected = $partId
+                    ? collect($episodes)->firstWhere('CONTENT_DETAIL_ID', $partId)
+                    : $meta;
+    
+                $video = array_merge($meta, $selected);
+    
+                // Always assign source
+                $video['SOURCE'] = $selected['SOURCE_PATH'] ?? $selected['SOURCE'] ?? $meta['SOURCE_PATH'] ?? $meta['SOURCE'] ?? '';
+    
+                // Always assign thumbnail
+                $video['THUMBNAIL_PATH'] = $selected['THUMBNAIL_PATH'] ?? $meta['THUMBNAIL_PATH'] ?? '';
+    
             } else {
-                return abort(404, 'Video not found');
+                $video = is_array($data) ? (array)$data : [];
+                $video['SOURCE'] = $video['SOURCE_PATH'] ?? $video['SOURCE'] ?? '';
             }
+    
+            // Final safety net
+            $video['SOURCE'] = (string) $video['SOURCE'];
+    
+            return view('play', compact('video', 'episodes'));
         }
     
         return abort(500, 'Failed to load video details');
     }
     
-
-    
-
 
 }

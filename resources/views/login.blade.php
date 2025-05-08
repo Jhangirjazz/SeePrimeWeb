@@ -35,8 +35,14 @@
         <button type="submit">Sign In</button>
       </form>
 
-      <!-- Forgot Password -->
-      <a href="#" class="forgot-password">Forgot Password?</a>
+  
+     <!-- Forgot Password and Not Now -->
+     <div class="d-flex justify-content-between align-items-center mt-3">
+      <a href="{{ url('/welcome') }}" style="color: #fff; font-size: 0.9rem; text-decoration: underline;">Not Now</a>
+      <a href="#" style="color: #fff; font-size: 0.9rem;">Forgot Password ?</a>
+  </div>
+  
+
 
       <!-- Create Account -->
       <div class="create-account">

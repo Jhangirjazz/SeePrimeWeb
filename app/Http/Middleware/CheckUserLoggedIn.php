@@ -15,16 +15,21 @@ class CheckUserLoggedIn
      */
     public function handle(Request $request, Closure $next): Response
     {
-          if(!session()->has('user_id')){
-                return redirect('/');
-          }  
+          // Allow /welcome page without login
+    if (!session()->has('user_id')) {
+      if ($request->is('welcome')) {
+          return $next($request);
+      }
 
-          $response = $next($request);
+      // Redirect for all other protected routes
+      return redirect('/')->with('error', 'Please log in to continue.');
+  }
 
-          return $response->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-                          ->header('Pragma', 'no-cache')
-                          ->header('Expires', '0');
+  $response = $next($request);
 
+  return $response->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                  ->header('Pragma', 'no-cache')
+                  ->header('Expires', '0');
           
     }
 }

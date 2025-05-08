@@ -320,7 +320,7 @@ footer {
   height: 90vh;
   display: flex;
   align-items: center;
-  padding-left: 6%;
+  padding-right: 40%;
 }
 
 .hero-banner p {
@@ -328,19 +328,49 @@ footer {
   color: #ddd;
 }
 
+.trailer-play-btn-inline {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.trailer-play-btn-inline .circle {
+  width: 40px;
+  height: 40px;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.trailer-play-btn-inline:hover .circle {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.trailer-play-btn-inline .text {
+  color: white;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+
 .trailer-play-btn {
   position: absolute;
   top: 50%;
-  right: 4%;
+  left: 130%; /* pushes it to the right of container */
   transform: translateY(-50%);
   color: white;
   text-decoration: none;
   font-weight: 500;
   letter-spacing: 1px;
+  z-index: 2;
 }
 
 .trailer-play-btn .circle {
-  width: 50px;
+  width: 70px;
   height: 50px;
   border: 2px solid white;
   border-radius: 50%;
@@ -361,6 +391,7 @@ footer {
 .trailer-play-btn .text {
   font-size: 14px;
   color: white;
+
 }
 
 .category-section {
@@ -387,8 +418,8 @@ footer {
   margin: 0 auto;
   max-width: 100%;
   box-sizing: border-box;
-  margin-left: 40px;
-  margin-right: 40px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .content-card {
@@ -426,52 +457,31 @@ footer {
 
 .scroll-controls {
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  transform: translateY(-50%);
+  top: -35px; /* push above content */
+  right: 20px; /* stay aligned to the right */
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  z-index: 5; 
+  flex-direction: row;
+  gap: 10px;
+  z-index: 10;
 }
 
 .slider-wrapper {
   position: relative;
-  padding: 0 40px;
+  padding: 0;
 }
 
 .scroll-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid #fff;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s ease;
+  background-color: transparent;
+  color: red;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s ease;
 }
 
 .scroll-btn:hover {
-  background-color: #c10000;
-}
-
-.scroll-btn {
-  background-color: rgba(255, 0, 0, 0.9);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
+  color: #ff5a5a;
 }
 
 img {
@@ -514,7 +524,323 @@ img {
   text-decoration: underline; /* Optional */
 }
 
+.category-header {
+  margin-bottom: 10px;
+  padding-left: 20px; /* match the above */
+}
+
+.category-header h5 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff3c3c;
+  text-transform: capitalize;
+  margin-bottom: 0;
+}
+
+/* Custom Plyr Theme: SeePrime */
+.plyr--full-ui input[type=range]::-webkit-slider-thumb {
+  background: linear-gradient(to right, #ff3366, #9b51e0, #f2994a); /* gradient thumb */
+}
+
+.plyr--full-ui .plyr__progress--played,
+.plyr--full-ui .plyr__volume--display {
+  background: linear-gradient(to right, #ff3366, #9b51e0, #f2994a); /* progress + volume bar */
+}
+
+.plyr__control--overlaid {
+  background: linear-gradient(to right, #ff3366, #9b51e0, #f2994a);
+  border: none;
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+}
+
+.plyr__control:hover,
+.plyr__control[aria-pressed="true"] {
+  background: linear-gradient(to right, #ff3366, #9b51e0, #f2994a);
+  color: #fff;
+}
+
+.plyr__menu__container {
+  background-color: #1a1a1a;
+  border: 1px solid #ff3366;
+}
+
+.plyr--video {
+  --plyr-color-main: #ff3366; /* default fallback color */
+}
+
+.hero-meta .stars i {
+  font-size: 18px;
+}
+
+.hero-meta span.badge {
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 3px;
+}
 
 
+.hero-meta .badge {
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
 
+.hero-meta .fas.fa-star {
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+.hero-meta span {
+  font-size: 14px;
+}
+
+.top10-scroll-container {
+  position: absolute;
+  top: 360px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+}
+
+.trending-banner {
+  background: linear-gradient(to right, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.3) 100%);
+  background-size: contain;
+  height: 65vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rank-number {
+  position: absolute;
+  top: -30px;
+  left: -10px;
+  font-size: 70px;
+  font-weight: bold;
+  color:white;
+  z-index: 2;
+}
+
+.top10-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 200px;
+  margin: 0 !important;     /* Remove manual margins */
+  padding: 0 !important;
+}
+
+.top10-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border-bottom: 2px solid #ff3366;
+}
+
+.top10-card:first-child {
+  margin-right: 0 !important;
+}
+
+#top10-scroll-inner::-webkit-scrollbar {
+  display: none;
+}
+
+#top10-scroll-inner {
+  display: flex;
+  gap: 6rem; /* This handles spacing between ALL cards */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0 2rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scroll-button-bar {
+  position: absolute;
+  bottom: 150px; /* adjust above cards */
+  right: 40px;
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.scroll-container-banner::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.banner-card:hover {
+  transform: scale(1.05);
+}
+
+.banner-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 2px solid #ff3366;
+}
+
+.banner-card h5 {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px;
+  color: #fff;
+  text-align: center;
+}
+
+/* Horizontal scrollable full-width movie banners */
+.scrollable-hero-banner {
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  height: 90vh;
+  position: relative;
+}
+
+.hero-banner-scroll-inner {
+  display: flex;
+  width: max-content;
+}
+
+.hero-banner-single {
+  flex: 0 0 100vw;
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 60px;
+  color: white;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+}
+
+.hero-banner-single::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.3) 100%);
+  z-index: 0;
+}
+
+.hero-banner-single .banner-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  padding-right: 60px;
+  padding-left: 60px;
   
+}
+
+.hero-banner-single .featured-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  text-align: left;
+}
+
+.hero-banner-single p {
+  font-size: 1.1rem;
+  color: #ddd;
+  text-align: left;
+}
+/* ✅ Fix: Hide scrollbar in banner section */
+
+.scrollable-hero-banner {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.left-banner-text {
+  flex: 1;
+  max-width: 55%;
+}
+
+.right-banner-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 45%;
+}
+
+.right-banner-btn .btn {
+  font-weight: bold;
+  border-radius: 30px;
+  padding: 12px 28px;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.right-banner-btn .btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ff3366;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.action-buttons .btn {
+  font-weight: bold;
+  border-radius: 30px;
+  padding: 12px 28px;
+}
+
+.action-buttons .btn-outline-light {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+.action-buttons .btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ff3366;
+  
+}
+
+.left-banner-text p.lead {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* ✅ only show 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-banner-single .left-banner-text p.lead {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* clamp to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%; /* prevent overflow */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.scroll-button-bar .btn:hover,
+.scroll-button-bar .btn:focus {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
