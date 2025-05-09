@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+  @livewireStyles
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,9 +15,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">  
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 @stack('scripts')
-
 <body> 
     
     <nav class="navbar navbar-expand-lg navbar-dark ">
@@ -57,32 +58,42 @@
             <div class="d-flex align-items-center gap-3">
 
   
-  <!-- User Icon or Logout Button -->
+<!-- Right-side icons: Search, Bell, Logout -->
+<div class="d-flex align-items-center gap-3">
 
+  <!-- Search Bar -->
+  <form method="GET" action="{{ route('search') }}" class="d-flex align-items-center bg-white px-2 rounded" style="height: 38px;">
+      <button type="submit" class="border-0 bg-transparent p-0">
+          <i class="fas fa-search text-dark"></i>
+      </button>
+      <input 
+          type="text" 
+          name="query" 
+          class="form-control border-0 ms-2 shadow-none" 
+          placeholder="Search" 
+          style="width: 180px;" 
+          required
+      >
+  </form>
 
-  <div class="d-flex align-items-center gap-3 ms-auto header-actions">
-    <!-- Search box -->
-    <div class="d-flex align-items-center bg-white px-2 rounded search-wrapper">
-      <i class="fas fa-search text-dark"></i>
-      <input type="text" class="form-control border-0 ms-2 shadow-none" placeholder="Search" style="width: 180px;">
-    </div>
-  
-    <!-- Notification icon -->
-    <a href="#" class="text-white fs-5">
-      <i class="fas fa-bell"></i>
+  <!-- Notification Icon -->
+  <a href="#" class="text-white fs-5 d-flex align-items-center">
+    <i class="fas fa-bell"></i>
+  </a>
+
+  <!-- Logout / Profile -->
+  @if(session()->has('user_id'))
+    <a href="{{ url('/logout') }}" class="btn btn-danger btn-sm d-flex align-items-center">Logout</a>
+  @else
+    <a href="{{ url('/') }}" class="text-white">
+      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
+        <i class="bi bi-person-circle"></i>
+      </div>
     </a>
-  
-    <!-- Logout or User -->
-    @if(session()->has('user_id'))
-      <a href="{{ url('/logout') }}" class="btn btn-danger btn-sm">Logout</a>
-    @else
-      <a href="{{ url('/') }}" class="text-white">
-        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
-          <i class="bi bi-person-circle"></i>
-        </div>
-      </a>
-    @endif
-  </div>
+  @endif
+
+</div>
+
   
       
           </div>
@@ -190,7 +201,7 @@
           </div>
           
           <div class="copyright">
-            &copy; 2024 <span class="brand">SeePrime</span>. All Rights Reserved.
+            &copy; 2025 <span class="brand">SeePrime</span>. All Rights Reserved.
           </div>
         </div>
     </div>
@@ -209,7 +220,7 @@
 </div>
 @endif
 
-   
+@livewireScripts   
 </body>
 </html>
 <!-- Plyr JS -->

@@ -38,22 +38,39 @@
                     <div class="left-banner-text">
                         <h1 class="featured-title">{{ strtoupper($title) }}</h1>
                         <p class="lead">{{ $longDesc }}</p>
-                        @if ($genres)
-                            <p class="text-light"><strong>Genres:</strong> {{ $genres }}</p>
+                    
+                        @if (!empty($item['AGE_RATING']))
+                            <p class="text-light mb-1"><strong>Rating:</strong> {{ $item['AGE_RATING'] }}</p>
                         @endif
-                        <a href="{{ route('play.video', ['id' => $contentId]) }}" class="btn btn-danger px-4 py-2 me-3">
-                            <i class="fas fa-play me-2"></i> Watch Now
-                        </a>
-                    </div>
-                    <div class="right-banner-btn">
-                        <a href="{{ $trailerUrl }}" target="_blank" class="btn btn-outline-light px-4 py-2">
-                            <i class="fas fa-play-circle me-2"></i> Watch Trailer
-                        </a>
-                    </div>
+                    
+                        @if (!empty($item['REVIEW_STARS']))
+                            <p class="text-light mb-2">
+                                <strong>Review Stars:</strong>
+                                @for ($i = 1; $i <= floor($item['REVIEW_STARS']); $i++)
+                                    <i class="fas fa-star text-warning"></i>
+                                @endfor
+                                @if (fmod($item['REVIEW_STARS'], 1) >= 0.5)
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                @endif
+                                <span class="ms-1">{{ $item['REVIEW_STARS'] }}/5</span>
+                            </p>
+                        @endif
+                    
+                        @if ($genres)
+                        <p class="text-light"><strong>Genres:</strong> {{ $genres }}</p>
+                    @endif
+                    <a href="{{ route('play.video', ['id' => $contentId]) }}" class="btn btn-danger px-4 py-2 me-3 mt-2">
+                        <i class="fas fa-play me-2"></i> Watch Now
+                    </a>                    
                 </div>
-                
+                <div class="right-banner-btn">
+                    <a href="{{ $trailerUrl }}" target="_blank" class="btn btn-outline-light px-4 py-2">
+                        <i class="fas fa-play-circle me-2"></i> Watch Trailer
+                    </a>
+                </div>
             </div>
-            @endif
+        </div> {{-- <== this closes .hero-banner-single --}}
+        @endif {{-- ✅ THIS closes @if ($thumbUrl) --}}
         @endforeach
     </div>
 </div>

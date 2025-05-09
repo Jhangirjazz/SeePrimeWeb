@@ -17,7 +17,11 @@ class PageController extends Controller
     if ($response->successful()) {
         $data = $response->json();
 
-        $featured = $data[0] ?? null;
+        $featured = collect($data)->firstWhere('CONTENT_ID', (string) $data[0]['CONTENT_ID'] ?? null);
+        $featured['REVIEW_STARS'] = $featured['REVIEW_STARS'] ?? null;
+        $featured['AGE_RATING'] = $featured['AGE_RATING'] ?? null;
+        $featured['DESCRIPTION'] = $featured['DESCRIPTION'] ?? 'No description available.';
+
         $grouped = collect($data)->groupBy('CONTENT_TYPE');
 
         $top10 = collect($data)
@@ -150,40 +154,132 @@ class PageController extends Controller
     
         if ($response->successful()) {
             $data = $response->json();
+
+                        // Fetch top-level content info from select_content API
+            $metaApiUrl = "http://15.184.102.5/SeePrime/APIS/SELECT.php?select_id=select_content&admin_portal=Y";
+            $metaResponse = Http::get($metaApiUrl);
+
+            $metaContent = [];
+            if ($metaResponse->successful()) {
+                $allContent = $metaResponse->json();
+                $metaContent = collect($allContent)->firstWhere('CONTENT_ID', (string)$id);
+}
+
     
-            $isMultiPart = is_array($data) && isset($data[0]) && isset($data[0]['CONTENT_ID']);
-            $episodes = [];
+            // ✅ Define multi-part only if array has more than 1 item with CONTENT_DETAIL_ID
+            $isMultiPart = is_array($data) && count($data) > 1 && isset($data[0]['CONTENT_DETAIL_ID']);
+            $episodes = $isMultiPart ? $data : [];
+             // or SEASON based on your data key
             $video = [];
-    
+
+            
             if ($isMultiPart) {
-                $episodes = $data;
-    
-                $meta = $episodes[0];
+                $meta = $data[0];
                 $selected = $partId
-                    ? collect($episodes)->firstWhere('CONTENT_DETAIL_ID', $partId)
-                    : $meta;
-    
+                ? collect($data)->firstWhere('CONTENT_DETAIL_ID', $partId)
+                : $meta;
+
+                $selectedSeason = $partId 
+                ? (string) ($selected['SEASON'] ?? '1')
+                : (string) request()->get('season', '1');
+
+
+                // ✅ Merge selected episode and fallback data into $video
                 $video = array_merge($meta, $selected);
-    
-                // Always assign source
+
+                // ✅ Fallback from top-level content meta
+                $video['REVIEW_STARS'] = $video['REVIEW_STARS'] ?? $metaContent['REVIEW_STARS'] ?? null;
+                $video['AGE_RATING']   = $video['AGE_RATING'] ?? $metaContent['AGE_RATING'] ?? null;
+                $video['TITLE']        = $video['TITLE'] ?? $metaContent['TITLE'] ?? 'Untitled';
+                $video['DESCRIPTION']  = $video['DESCRIPTION'] ?? $metaContent['DESCRIPTION'] ?? 'No description available';
+
+
+                    // $video = array_merge($meta, $selected);
+                    // $video['TITLE']        = $video['TITLE'] ?? $meta['TITLE'] ?? 'Untitled';
+                    // $video['DESCRIPTION']  = $video['DESCRIPTION'] ?? $meta['DESCRIPTION'] ?? 'No description available';
+                    // $video['REVIEW_STARS'] = $video['REVIEW_STARS'] ?? $meta['REVIEW_STARS'] ?? null;
+                    // $video['AGE_RATING']   = $video['AGE_RATING'] ?? $meta['AGE_RATING'] ?? null;
+
+                    
+
                 $video['SOURCE'] = $selected['SOURCE_PATH'] ?? $selected['SOURCE'] ?? $meta['SOURCE_PATH'] ?? $meta['SOURCE'] ?? '';
-    
-                // Always assign thumbnail
                 $video['THUMBNAIL_PATH'] = $selected['THUMBNAIL_PATH'] ?? $meta['THUMBNAIL_PATH'] ?? '';
-    
-            } else {
-                $video = is_array($data) ? (array)$data : [];
+            
+                // ✅ Group episodes by string-based season key
+                $episodes = $data;
+                $episodesBySeason = collect($episodes)
+                    ->groupBy('SEASON')
+                    ->mapWithKeys(function ($items, $key) {
+                        return [(string) $key => $items];
+                    });
+            }
+            
+            else {
+                // Handle single video that may still be wrapped in an array
+                $raw = is_array($data) && isset($data[0]) ? $data[0] : $data;
+            
+                $video = is_array($raw) ? $raw : [];
+                
+                $video['REVIEW_STARS'] = $video['REVIEW_STARS'] ?? $metaContent['REVIEW_STARS'] ?? null;
+                $video['AGE_RATING']   = $video['AGE_RATING'] ?? $metaContent['AGE_RATING'] ?? null;
+                $video['TITLE']        = $video['TITLE'] ?? $metaContent['TITLE'] ?? 'Untitled';
+                $video['DESCRIPTION']  = $video['DESCRIPTION'] ?? $metaContent['DESCRIPTION'] ?? 'No description available';
                 $video['SOURCE'] = $video['SOURCE_PATH'] ?? $video['SOURCE'] ?? '';
+                $video['THUMBNAIL_PATH'] = $video['THUMBNAIL_PATH'] ?? '';
+
+                $episodes = [];
+                $episodesBySeason = collect();
+                $selectedSeason = 1;
+            }
+            
+        
+    
+            // ✅ Detect YouTube
+            if (!empty($video['SOURCE']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['SOURCE'])) {
+                $video['SOURCE_TYPE'] = 'youtube';
+                $video['YOUTUBE_ID'] = $video['SOURCE'];
+            } else {
+                $video['SOURCE_TYPE'] = 'video';
             }
     
-            // Final safety net
-            $video['SOURCE'] = (string) $video['SOURCE'];
-    
-            return view('play', compact('video', 'episodes'));
+            return view('play',[
+                'video' => $video,
+                'episodes' =>  $episodes,
+                'episodesBySeason' => $episodesBySeason,
+                'selectedSeason' => $selectedSeason     
+            ]);
         }
     
         return abort(500, 'Failed to load video details');
     }
     
+
+    public function search(Request $request)
+{
+    $query = trim($request->input('query'));
+
+    // Fetch content list from API
+    $apiUrl = "http://15.184.102.5/SeePrime/APIS/SELECT.php?select_id=select_content&admin_portal=Y";
+    $response = Http::get($apiUrl);
+
+    $results = [];
+
+    if ($response->successful()) {
+        $data = $response->json();
+
+        // Filter by title or description
+        $results = collect($data)->filter(function ($item) use ($query) {
+            return str_contains(strtolower($item['TITLE'] ?? ''), strtolower($query)) ||
+                   str_contains(strtolower($item['DESCRIPTION'] ?? ''), strtolower($query));
+        });
+        
+    }
+
+    return view('search-results', [
+        'results' => $results,
+        'query'   => $query,
+    ]);
+}
+
 
 }

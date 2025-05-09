@@ -18,6 +18,7 @@ Route::middleware(['check_user'])->group(function () {
     Route::get('/webseries', [PageController::class, 'webseries']);
     Route::get('/new', [PageController::class, 'new']);
     Route::get('/mylist', [PageController::class, 'mylist']);
+    Route::get('/search', [App\Http\Controllers\PageController::class, 'search'])->name('search');
 });
 
 ?>
