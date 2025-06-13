@@ -1,19 +1,59 @@
 @extends('layouts.master')
 
-@section('Title', 'Shows' )
-
+@section('title', 'Shows')
 
 @section('content')
-<div class="video-wrapper">
-    <video width="100%" height="100%" autoplay muted loop>
-      <source src="{{ asset('videos/sample3.mp4') }}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  
-    <!-- Overlay -->
-    <div class="video-overlay">
-      <h2>Welcome to Shows</h2>
+<div class="container-fluid px-0" style="background-color: #000; padding-top: 100px;">
+    <div class="px-4 pb-3">
+        <h2 class="text-white fw-bold display-5 mb-1">Shows</h2>
+        <p class="text-light mb-4">Binge-worthy shows across every mood and <br>
+Discover our collection of gripping dramas, hilarious comedies, and heartwarming series that keep you coming back for more.</p>
     </div>
-  </div>
 
+
+    @foreach ($sections as $genre => $items)
+    <div class="category-section mb-2 bg-black py-3 px-2 rounded">
+        <div class="d-flex justify-content-between align-items-center mb-2 px-4">
+            <h5 class="text-danger fw-bold m-0">{{ $genre ?? 'Untitled Genre' }}</h5>
+        </div>
+        <div class="slider-wrapper position-relative w-100">
+            <div class="scroll-container">
+                @foreach ($items as $item)
+                    @php
+                        $thumb = $item['THUMBNAIL_PATH'] ?? null;
+                        $title = $item['TITLE'] ?? 'Untitled';
+                        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+                        $thumbUrl = asset('images/default.jpg');
+
+                        if ($thumb && str_ends_with($thumb, '.jpg')) {
+                            $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
+                        } elseif ($source === 'youtube' && $thumb) {
+                            $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
+                        }
+                    @endphp
+                    <div class="content-card me-3">
+                        <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}">
+                            <div class="thumbnail-wrapper position-relative">
+                                <img src="{{ $thumbUrl }}" class="rounded w-100" alt="{{ $title }}">
+                                @if (!empty($item['IS_PREMIUM']) && $item['IS_PREMIUM'] === 'Y')
+                                    <span class="premium-badge position-absolute top-0 start-0">Prime</span>
+                                @endif
+                            </div>
+                            <p class="text-white small mt-2 text-center fw-bold">{{ $title }}</p>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+            <div class="scroll-controls">
+                <button class="scroll-btn scroll-left" onclick="scrollSlider(this, -300)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="scroll-btn scroll-right" onclick="scrollSlider(this, 300)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
 @endsection

@@ -64,6 +64,7 @@
             </div>
           </div>
           <div class="button-container">
+            <button type="button" onclick="extractFormInputsAsJson()">Show Input JSON</button>
             <button type="button" class="back-btn" onclick="prevStep()">Back</button>
             <button type="submit" class="continue-btn">Continue</button>
           </div>
@@ -79,6 +80,24 @@
 </div>
 
 <script>
+
+//JSON INPUT TEMPORARY
+function extractFormInputsAsJson() {
+  const form = document.getElementById('registration-form');
+  const inputs = form.querySelectorAll('input, select');
+  const inputData = {};
+
+  inputs.forEach(input => {
+    if (input.name && input.type !== 'submit' && !input.disabled) {
+      inputData[input.name] = input.value || '';
+    }
+  });
+
+  console.log("Form Input JSON:");
+  console.log(JSON.stringify(inputData, null, 2));
+  alert("check console for form data");
+}
+
   // Step navigation
   function nextStep() {
     document.getElementById('step-1').classList.remove('active');
@@ -124,7 +143,7 @@
   }
 
   // Stripe initialization
-  const stripe = Stripe(''); // Replace with your Stripe publishable key
+  const stripe = Stripe('pk_test_51Nxxx...'); // Replace with your Stripe publishable key
   const elements = stripe.elements();
   const cardElement = elements.create('card', {
     style: {

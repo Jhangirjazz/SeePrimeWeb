@@ -16,6 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .register-form {
@@ -24,6 +25,8 @@
   padding: 20px;
   text-align: center;
   color: #fff;
+  background-color: rgba(0, 0, 0, 0.6); /* Optional for mobile readability */
+  border-radius: 8px;
 }
 
 .register-form img {
@@ -56,8 +59,6 @@
 
 .register-form select {
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   background: rgba(255, 255, 255, 0.9) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23333" d="M6 9L2 5h8z"/></svg>') no-repeat right 15px center;
 }
 
@@ -157,4 +158,59 @@
   display: flex;
   gap: 10px;
   justify-content: center;
+}
+
+/* ======================================= */
+/* ✅ Responsive Media Queries */
+/* ======================================= */
+@media (max-width: 768px) {
+  .register-form {
+    padding: 15px;
+    max-width: 90%;
+  }
+
+  .register-form h3 {
+    font-size: 20px;
+  }
+
+  .register-form input,
+  .register-form select,
+  .register-form button {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .expiry-cvv-container {
+    flex-direction: column;
+  }
+
+  .expiry-field,
+  .cvv-field {
+    width: 100%;
+  }
+
+  .button-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-overlay {
+    padding: 10px;
+  }
+
+  .register-form h3 {
+    font-size: 18px;
+  }
+
+  .register-form input,
+  .register-form select,
+  .register-form button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .register-form img {
+    width: 60px;
+  }
 }

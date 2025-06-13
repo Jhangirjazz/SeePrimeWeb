@@ -7,25 +7,28 @@
     <h4 class="text-white">Search results for: <em>{{ $query }}</em></h4>
 
     @if($results->count())
-    <div class="row mt-4">
-        @foreach ($results as $video)
-    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-        <div class="card bg-dark text-white border-0 shadow-sm h-100">
-            @php
-                $thumbUrl = '';
+                <div class="row mt-4">
+                    @foreach ($results as $video)
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card bg-dark text-white border-0 shadow-sm h-100">
+                        @php
+                $thumb = $video['THUMBNAIL_PATH'] ?? null;
+                $source = strtolower($video['SOURCE'] ?? $video['SOURCE_PATH'] ?? '');
+                $thumbUrl = asset('images/default.jpg'); // default fallback
 
-                if (!empty($video['SOURCE']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['SOURCE'])) {
-                    // YouTube video
-                    $thumbUrl = "https://img.youtube.com/vi/{$video['SOURCE']}/maxresdefault.jpg";
-                } elseif (!empty($video['THUMBNAIL_PATH'])) {
-                    // Local video
-                    $thumbUrl = "http://15.184.102.5/SeePrime/Content/Images/{$video['THUMBNAIL_PATH']}";
-                } else {
-                    $thumbUrl = asset('images/default.jpg');
+                // ✅ Extract YouTube video ID if full URL is stored
+                if ($source === 'youtube' && $thumb && str_contains($thumb, 'youtube.com')) {
+                    parse_str(parse_url($thumb, PHP_URL_QUERY), $ytParams);
+                    $thumb = $ytParams['v'] ?? $thumb;
                 }
-            @endphp
 
-
+                // ✅ Build proper thumbnail URL
+                if ($thumb && str_ends_with($thumb, '.jpg')) {
+                    $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
+                } elseif ($source === 'youtube' && $thumb) {
+                    $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
+                }
+@endphp
             <img 
                 src="{{ $thumbUrl }}" 
                 alt="{{ $video['TITLE'] ?? 'Thumbnail' }}" 

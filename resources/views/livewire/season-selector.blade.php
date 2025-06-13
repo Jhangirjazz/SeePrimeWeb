@@ -10,23 +10,21 @@
             </select>
         </div>
 
-        {{-- @if (empty($filteredEpisodes))
-            <div class="alert alert-warning text-dark">
-                No episodes found for this content {{ $selectedSeason }}
-            </div>
-        @endif --}}
 
         <div class="d-flex flex-column gap-3 py-3">
-            @foreach ($filteredEpisodes as $ep)
-                <div class="d-flex bg-dark rounded p-3 align-items-start position-relative">
+                    @foreach ($filteredEpisodes as $ep)
+            <a href="{{ route('play.video', ['id' => $contentId, 'partId' => $ep['CONTENT_DETAIL_ID']]) }}"
+            class="text-decoration-none">
+                <div class="d-flex bg-dark rounded p-3 align-items-start position-relative episode-card-hover"
+                    style="transition: background 0.3s;">
                     <img src="{{ $ep['THUMBNAIL_PATH'] 
                             ? 'http://15.184.102.5/SeePrime/Content/Images/' . $ep['THUMBNAIL_PATH'] 
                             : asset('images/default.jpg') }}"
-                         alt="{{ $ep['TITLE'] ?? 'Episode' }}"
-                         class="rounded" style="width: 180px; height: auto; object-fit: cover;">
+                        alt="{{ $ep['TITLE'] ?? 'Episode' }}"
+                        class="rounded" style="width: 180px; height: auto; object-fit: cover;">
 
                     <div class="ms-3 flex-grow-1">
-                        <h6 class="fw-bold text-white mb-1">{{ $ep['TITLE'] ?? 'Untitled Episode' }}</h6>
+                        <h6 class="fw-bold text-white mb-1">{{ $ep['SOURCE_PATH'] ?? 'Untitled Episode' }}</h6>
                         <small class="text-muted d-block mb-1">
                             {{ $ep['RELEASE_DATE'] ?? '' }} • {{ $ep['DURATION'] ?? 'N/A' }}
                             @if (!empty($ep['AGE_RATING']))
@@ -38,14 +36,12 @@
                         </p>
                     </div>
 
-                    <div class="ms-3">
-                        <a href="{{ route('play.video', ['id' => $contentId, 'partId' => $ep['CONTENT_DETAIL_ID']]) }}"
-                            class="text-white fs-5" title="Watch Episode">
-                            <i class="bi bi-play-circle"></i>
-                        </a>
+                    <div class="ms-3 text-white fs-5">
+                        <i class="bi bi-play-circle"></i> Play
                     </div>
                 </div>
-            @endforeach
+            </a>
+        @endforeach
         </div>
     </div>
 </div>

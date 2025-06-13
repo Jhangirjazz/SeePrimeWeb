@@ -1,14 +1,19 @@
-@extends('Layouts.master')
+@extends('layouts.master')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-    <h1>new</h1>
-</body>
-</html>
+@section('Title', 'New' )
+
+
+@section('content')
+<div class="video-wrapper">
+    <video width="100%" height="100%" autoplay muted loop>
+      <source src="{{ asset('videos/sample3.mp4') }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  
+    <!-- Overlay -->
+    <div class="video-overlay">
+      <h2>Welcome to New</h2>
+    </div>
+  </div>
+
+@endsection

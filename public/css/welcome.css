@@ -41,13 +41,10 @@ footer {
   }
   
   .footer-content {
-      height: 50vh;
-      display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 4 column grid */
-    gap: 0px;
-    width: 100%; /* ye control karega kitna wide ho grid */
-    margin: 0 auto;
-    padding: 0 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 👈 Responsive grid */
+    gap: 30px;
+    padding: 30px;
   }
   
   .footer-logo-section {
@@ -843,4 +840,285 @@ img {
     box-shadow: none !important;
     outline: none !important;
 }
+.premium-badge {
+  background-color: #e50914;
+  color: white;
+  font-size: 16px;
+  padding: 5px 10px;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 10px;
+  font-weight: 600;
+  z-index: 99;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-1px, -1px);
+}
+@media (max-width: 1200px) {
+  .hero-banner-single .banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 30px;
+  }
+
+  .right-banner-btn {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 20px;
+  }
+
+  .navbar-nav .nav-link {
+    padding-right: 30px !important;
+    padding-left: 30px;
+  }
+
+  .hero-banner {
+    height: auto;
+    flex-direction: column;
+    padding: 40px 20px;
+  }
+
+  .hero-banner h1 {
+    font-size: 2rem;
+  }
+
+  .scroll-container {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .content-card {
+    width: 300px;
+    height: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .hero-banner-single .featured-title {
+    font-size: 2rem;
+  }
+
+  .content-card {
+    width: 240px;
+    height: 200px;
+  }
+
+  .rank-number {
+    font-size: 40px;
+    top: -15px;
+  }
+
+  .top10-card {
+    width: 160px;
+  }
+
+  .trailer-play-btn {
+    left: auto;
+    right: 20px;
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-contact p,
+  .footer-column h3,
+  .footer-column ul li {
+    text-align: center;
+  }
+
+  .hero-banner {
+    padding-right: 20px;
+    height: auto;
+  }
+
+  .scroll-button-bar {
+    bottom: 100px;
+    right: 10px;
+  }
+
+  .scroll-container {
+    padding: 0;
+  }
+
+  .content-card {
+    width: 180px;
+    height: 150px;
+  }
+
+  .category-section h5 {
+    font-size: 16px;
+    margin-left: 10px;
+  }
+
+  .hero-banner-single {
+    height: 70vh;
+  }
+
+  .left-banner-text,
+  .right-banner-btn {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .hero-banner-single .banner-content {
+    padding: 20px;
+    flex-direction: column;
+  }
+}
+@media (max-width: 992px) {
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .social-links {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.footer-column h3, 
+.footer-column ul li {
+  text-align: left;
+}
+
+@media (max-width: 576px) {
+  .footer-column h3,
+  .footer-column ul li {
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 30px;
+    padding: 20px;
+  }
+
+  .footer-column,
+  .footer-logo-section {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .footer-column h3,
+  .footer-column ul li,
+  .footer-contact p,
+  .footer-contact .contact-title,
+  .footer-contact .phone {
+    text-align: center;
+  }
+
+  .footer-nav {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .social-links {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .newsletter-form input,
+  .newsletter-form button {
+    width: 100%;
+  }
+
+  .footer-bottom {
+    padding-top: 30px;
+  }
+}
+
+.scrollable-hero-banner {
+  display: flex;
+  overflow-x: auto; /* ✅ THIS is the scrollable area */
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hero-banner-scroll-inner {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.hero-banner-single {
+  flex: 0 0 100vw;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.filter-btn.active {
+  background-color: #ff3366 !important;
+  color: white !important;
+  border-color: #ff3366 !important;
+}
+
+.filter-btn {
+  background-color: transparent;
+  color: #ff3366;
+  border: 1px solid #ff3366;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.filter-btn:hover {
+  background-color: #ff3366;  
+  color: #fff;
+}
+
+.video-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255,255,255,0.3);
+    z-index: 2;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow: hidden;
+}
+
+.video-progress-fill {
+    height: 100%;
+    background-color: red;
+    transition: width 0.4s ease;
+}
+
+
+
+
 

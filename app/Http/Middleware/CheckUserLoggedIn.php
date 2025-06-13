@@ -15,6 +15,10 @@ class CheckUserLoggedIn
      */
     public function handle(Request $request, Closure $next): Response
     {
+            if ($request->is('api/continue-watching')) {
+        return $next($request);
+    }
+
           // Allow /welcome page without login
     if (!session()->has('user_id')) {
       if ($request->is('welcome')) {
@@ -26,6 +30,7 @@ class CheckUserLoggedIn
   }
 
   $response = $next($request);
+  $response = response($response);
 
   return $response->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                   ->header('Pragma', 'no-cache')

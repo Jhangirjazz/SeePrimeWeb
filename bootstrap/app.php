@@ -13,7 +13,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'check_user' => \App\Http\Middleware\CheckUserLoggedIn::class,
-        ]) ;     
+            'oracle_user' => \App\Http\Middleware\SetOracleClientIdentifier::class,
+        ]);
+
+        //  $middleware->append([
+        // \App\Http\Middleware\VerifyCsrfToken::class
+        //  ]);
+        
+        $middleware->appendToGroup('api', [
+        'oracle_user'  // ✅ Apply to API group
+    ]);
+    
     })
     ->withExceptions(function (Exceptions $exceptions) {
         

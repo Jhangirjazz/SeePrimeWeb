@@ -1,20 +1,19 @@
 @extends('layouts.master')
 
-@section('title', 'Movies')
+@section('title', 'Documentaries')
 
 @section('content')
 <div class="container-fluid px-0" style="background-color: #000; padding-top: 100px;">
     <div class="px-4 pb-3">
-        <h2 class="text-white fw-bold display-5 mb-1">Movies</h2>
-        <p class="text-light mb-4">Browse our movie collection —<br> action, comedy, thrillers and more.
-Dive into a world of captivating stories, blockbuster hits, and timeless classics from every genre.</p>
+        <h2 class="text-white fw-bold display-5 mb-1">Documentaries</h2>
+        <p class="text-light mb-4">Explore our selection of documentaries — <br>real stories, deeper truths.
+From nature and history to social issues and science, uncover thought-provoking films that inform and inspire.</p>
     </div>
-
 
     @foreach ($sections as $genre => $items)
     <div class="category-section mb-2 bg-black py-3 px-2 rounded">
         <div class="d-flex justify-content-between align-items-center mb-2 px-4">
-            <h5 class="text-danger fw-bold m-0">{{ $genre ?? 'Untitled Genre' }}</h5>
+            <h5 class="text-danger fw-bold m-0">{{ $genre !== 'Other' ? $genre : 'Uncategorized' }}</h5>
         </div>
         <div class="slider-wrapper position-relative w-100">
             <div class="scroll-container">
@@ -31,6 +30,7 @@ Dive into a world of captivating stories, blockbuster hits, and timeless classic
                             $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
                         }
                     @endphp
+
                     <div class="content-card me-3">
                         <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}">
                             <div class="thumbnail-wrapper position-relative">
