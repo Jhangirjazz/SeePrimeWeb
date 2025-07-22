@@ -8,44 +8,48 @@
 
     @if($results->count())
                 <div class="row mt-4">
-                    @foreach ($results as $video)
-                <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                    <div class="card bg-dark text-white border-0 shadow-sm h-100">
-                        @php
-                $thumb = $video['THUMBNAIL_PATH'] ?? null;
-                $source = strtolower($video['SOURCE'] ?? $video['SOURCE_PATH'] ?? '');
-                $thumbUrl = asset('images/default.jpg'); // default fallback
+    @foreach ($results as $video)
+        @if (is_array($video))
+        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="card bg-dark text-white border-0 shadow-sm h-100">
+                @php
+                    $thumb = $video['THUMBNAIL_PATH'] ?? null;
+                    $source = strtolower($video['SOURCE'] ?? $video['SOURCE_PATH'] ?? '');
+                    $thumbUrl = asset('images/default.jpg');
 
-                // ✅ Extract YouTube video ID if full URL is stored
-                if ($source === 'youtube' && $thumb && str_contains($thumb, 'youtube.com')) {
-                    parse_str(parse_url($thumb, PHP_URL_QUERY), $ytParams);
-                    $thumb = $ytParams['v'] ?? $thumb;
-                }
+                    if ($source === 'youtube' && $thumb && str_contains($thumb, 'youtube.com')) {
+                        parse_str(parse_url($thumb, PHP_URL_QUERY), $ytParams);
+                        $thumb = $ytParams['v'] ?? $thumb;
+                    }
 
-                // ✅ Build proper thumbnail URL
-                if ($thumb && str_ends_with($thumb, '.jpg')) {
-                    $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
-                } elseif ($source === 'youtube' && $thumb) {
-                    $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                }
-@endphp
-            <img 
-                src="{{ $thumbUrl }}" 
-                alt="{{ $video['TITLE'] ?? 'Thumbnail' }}" 
-                class="card-img-top" 
-                style="object-fit: cover; height: 280px;"
-            >
+                    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+                        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+                    } elseif ($source === 'youtube' && $thumb) {
+                        $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
+                    }
+                @endphp
 
-            <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="card-title mb-2">{{ $video['TITLE'] ?? 'Untitled' }}</h5>
-                <p class="card-text small text-muted mb-2">{{ \Illuminate\Support\Str::limit($video['DESCRIPTION'] ?? 'No description', 80) }}</p>
-                <a href="{{ route('play.video', ['id' => $video['CONTENT_ID']]) }}" class="btn btn-sm btn-danger mt-auto">
-                    <i class="bi bi-play-circle"></i> Watch
-                </a>
+                <img 
+                    src="{{ $thumbUrl }}" 
+                    alt="{{ $video['TITLE'] ?? 'Thumbnail' }}" 
+                    class="card-img-top" 
+                    style="object-fit: cover; height: 250px; width: 100%;"
+                >
+
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h5 class="card-title mb-2">{{ $video['TITLE'] ?? 'Untitled' }}</h5>
+                    <p class="card-text small text-muted mb-2">
+                        {{ \Illuminate\Support\Str::limit($video['DESCRIPTION'] ?? 'N/A', 100) }}
+                    </p>
+                    <a href="{{ route('play.video', ['id' => $video['CONTENT_ID']]) }}" class="btn btn-sm btn-danger">
+                        <i class="bi bi-play-circle"></i> Watch
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-@endforeach
+        @endif
+    @endforeach
+</div>
 
     </div>
     

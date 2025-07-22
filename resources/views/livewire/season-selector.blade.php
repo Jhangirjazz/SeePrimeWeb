@@ -18,7 +18,7 @@
                 <div class="d-flex bg-dark rounded p-3 align-items-start position-relative episode-card-hover"
                     style="transition: background 0.3s;">
                     <img src="{{ $ep['THUMBNAIL_PATH'] 
-                            ? 'http://15.184.102.5/SeePrime/Content/Images/' . $ep['THUMBNAIL_PATH'] 
+                            ? 'http://15.184.102.5//SeePrime/Content/Images/' . $ep['THUMBNAIL_PATH'] 
                             : asset('images/default.jpg') }}"
                         alt="{{ $ep['TITLE'] ?? 'Episode' }}"
                         class="rounded" style="width: 180px; height: auto; object-fit: cover;">

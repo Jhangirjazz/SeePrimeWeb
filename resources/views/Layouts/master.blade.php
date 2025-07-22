@@ -74,13 +74,7 @@
           <i class="fas fa-search text-dark"></i>
       </button>
       <input 
-          type="text" 
-          name="query" 
-          class="form-control border-0 ms-2 shadow-none" 
-          placeholder="Search" 
-          style="width: 180px;" 
-          required
-      >
+          type="text" name="query" class="form-control border-0 ms-2 shadow-none" placeholder="Search" style="width: 180px;" required>
   </form>
 
   <!-- Notification Icon -->
@@ -124,7 +118,7 @@
           <!-- Logo and contact section -->
           <div class="footer-logo-section">
             <div class="logo footer-logo">
-              <a href="#">
+              <a href={{url('/welcome')}}>
                 <img src="{{ asset('images/logo.png') }}" alt="SEEPRIME Logo" width="100" height="70" >
               </a>
             </div>
@@ -132,7 +126,7 @@
             <div class="footer-contact">
               <p class="text-white"><a href="mailto:uscustomer@streamit.com" class="text-white">Email: uscustomer@streamit.com</a></p>
               <p class="contact-title">CUSTOMER SERVICES</p>
-              <p class="phone"><a href="tel:(480) 555-0103" class="text-white">+ (480) 555-0103</a></p>
+              <p class="phone"><a href="tel:(480) 555-0103" class="text-white">+1 (480) 555-0103</a></p>
             </div>
           </div>
           
@@ -140,10 +134,10 @@
           <div class="footer-column">
             <h3>Quick Links</h3>
             <ul>
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Blog</a></li>
-              <li><a href="#">Pricing Plan</a></li>
-              <li><a href="#">FAQ</a></li>
+              <li><a href= {{url('/about')}}>About Us</a></li>
+              <li><a href={{url('/blog')}}>Blog</a></li>
+              <li><a href={{url('/pricing')}}>Pricing Plan</a></li>
+              <li><a href={{url('faq')}}>FAQ</a></li>
             </ul>
           </div>
           
@@ -151,9 +145,9 @@
           <div class="footer-column">
             <h3>Movies To Watch</h3>
             <ul>
-              <li><a href="#">Top Trending</a></li>
-              <li><a href="#">Recommended</a></li>
-              <li><a href="#">Popular</a></li>
+              <li><a href={{url('/top_trending')}}>Top Trending</a></li>
+              <li><a href={{url('/recomend')}}>Recommended</a></li>
+              <li><a href={{url('/popular')}}>Popular</a></li>
             </ul>
           </div>
           
@@ -161,9 +155,9 @@
           <div class="footer-column">
             <h3>About Company</h3>
             <ul>
-              <li><a href="#">Contact Us</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms Of Use</a></li>
+              <li><a href={{url('/contact')}}>Contact Us</a></li>
+              <li><a href={{url('/privacy')}}>Privacy Policy</a></li>
+              <li><a href={{url('/terms')}}>Terms Of Use</a></li>
             </ul>
           </div>
 
@@ -200,10 +194,10 @@
         <!-- Footer bottom section -->
         <div class="footer-bottom">
           <div class="footer-nav">
-            <a href="#">Terms Of Use</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Blog</a>
-            <a href="#">FAQ</a>
+            <a href={{url('/terms')}}>Terms Of Use</a>
+            <a href={{url('/privacy')}}>Privacy Policy</a>
+            <a href={{url('/blog')}}>Blog</a>
+            <a href={{url('faq')}}>FAQ</a>
             <a href="#">Watch List</a>
           </div>
           

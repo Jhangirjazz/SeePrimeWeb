@@ -15,10 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'check_user' => \App\Http\Middleware\CheckUserLoggedIn::class,
             'oracle_user' => \App\Http\Middleware\SetOracleClientIdentifier::class,
         ]);
-
-        //  $middleware->append([
-        // \App\Http\Middleware\VerifyCsrfToken::class
-        //  ]);
         
         $middleware->appendToGroup('api', [
         'oracle_user'  // ✅ Apply to API group
@@ -28,3 +24,4 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         
     })->create();
+?>

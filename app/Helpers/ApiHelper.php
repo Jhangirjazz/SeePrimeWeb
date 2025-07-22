@@ -16,3 +16,14 @@ if (!function_exists('seeprime_api')) {
         return $response->successful() ? $response->json() : [];
     }
 }
+
+if(!function_exists('seeprime_url')){
+    function seeprime_url(string $path = ''): string
+    {   $apiBase = config('services.seeprime_api.base_url');
+    if(!$apiBase){
+            throw new \Exception("Seeprime url not configured."); 
+        }
+            $basePath = preg_replace('/\/APIS\/SELECT\.php$/', '', $apiBase);
+            return rtrim($basePath, '/') . '/' . ltrim($path, '/');
+    }
+}

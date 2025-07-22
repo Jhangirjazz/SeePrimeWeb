@@ -36,7 +36,7 @@ return [
     ],
 
     'seeprime_api' => [
-        'base_url' => env('SEEPRIME_API_BASE', 'http://15.184.102.5:8443/SeePrime/APIS/SELECT.php'),
+        'base_url' => env('SEEPRIME_API_BASE'),
     ],
-
+    
 ];

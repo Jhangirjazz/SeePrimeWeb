@@ -24,8 +24,8 @@ From nature and history to social issues and science, uncover thought-provoking 
                         $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
                         $thumbUrl = asset('images/default.jpg');
 
-                        if ($thumb && str_ends_with($thumb, '.jpg')) {
-                            $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
+                        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+                            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
                         } elseif ($source === 'youtube' && $thumb) {
                             $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
                         }
@@ -57,3 +57,12 @@ From nature and history to social issues and science, uncover thought-provoking 
     @endforeach
 </div>
 @endsection
+<script>
+    function scrollSlider(button,amount){
+        const scrollContainer = button.closest('.slider-wrapper').querySelector('.scroll-container');
+        scrollContainer.scrollBy({
+            left : amount,
+            behavior : 'smooth'
+        });
+    }
+</script>

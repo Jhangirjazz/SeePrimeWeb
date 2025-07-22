@@ -8,9 +8,17 @@
 </head>
 <body>
 
+
 <div class="login-wrapper">
   <div class="login-overlay">
     <div class="login-form">
+      
+  @if (session('message'))
+    <div class="alert alert-success">
+        {{ session('message') }}
+    </div>
+  @endif
+
 
       <!-- SEEPRIME logo -->
       <img src="{{ asset('images/logo.png') }}" alt="SeePrime Logo">
@@ -38,7 +46,7 @@
   
      <!-- Forgot Password and Not Now -->
      <div class="d-flex justify-content-between align-items-center mt-3">
-      <a href="{{ url('/welcome') }}" style="color: #fff; font-size: 0.9rem; text-decoration: underline;">Not Now</a>
+      <a href="{{ url('/welcome') }}" style="color: #fff; font-size: 0.9rem text-bold;">Not Now</a>
       <a href="#" style="color: #fff; font-size: 0.9rem;">Forgot Password ?</a>
   </div>
   
@@ -56,3 +64,21 @@
 </body>
 </html>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+//   document.querySelector('form').addEventListener('submit', function(event) {
+//     event.preventDefault(); // Stop normal form submission
+
+//     const form = this;
+//     const username = form.querySelector('input[name="username"]').value;
+//     const password = form.querySelector('input[name="password"]').value;
+
+//     const apiUrl = `http://15.184.102.5/Seeprime/apis/select.php?select_id=select_users_by_name_and_pass&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&admin_portal=N`;
+
+//     console.log("🔍 API Being Called on Sign In:", apiUrl);
+
+//     // Optionally delay submission so you can see the log
+//     setTimeout(() => {
+//       form.submit(); // Now submit the form
+//     }, 2000); // 2 seconds delay
+//   });
+// </script>

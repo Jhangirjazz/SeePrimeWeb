@@ -12,8 +12,8 @@
                 @php
                     $thumb = $item['THUMBNAIL_PATH'] ?? null;
                     $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-                    if ($thumb && str_ends_with($thumb, '.jpg')) {
-                        $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
+                    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+                        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
                     } elseif ($source === 'youtube' && $thumb) {
                         $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
                     } else {

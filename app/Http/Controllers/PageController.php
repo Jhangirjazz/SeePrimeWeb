@@ -9,14 +9,12 @@ use Illuminate\Support\Facades\Log;
 use App\Models\MyList;
 use App\Models\WatchHistory;
 
-
-
 class PageController extends Controller
 {
 
  public function welcome()
 {
-     $categories = seeprime_api(['select_id'=>'select_categories','admin_portal'=>'N']);
+    $categories = seeprime_api(['select_id'=>'select_categories','admin_portal'=>'N']);
     $genres     = seeprime_api(['select_id'=>'select_genres',     'admin_portal'=>'N']);
     $latest     = seeprime_api(['select_id'=>'select_latest_content','admin_portal'=>'N']);
 
@@ -25,37 +23,72 @@ class PageController extends Controller
         'admin_portal' => config('app.debug') ? 'Y' : 'N',
     ]);
 
+    if (!is_array($latest)) {
+    $latest = [];
+}
+
+$latest = array_filter($latest, function ($item) {
+    return is_array($item) && !empty($item['CONTENT_ID']);
+});
+
+
     /* featured / grouped / top-10 ------------------------------------------------ */
-    $featured = collect($data)->firstWhere('CONTENT_ID', (string)$data[0]['CONTENT_ID'] ?? null);
+    // $featured = collect($data)->firstWhere('CONTENT_ID', (string)$data[0]['CONTENT_ID'] ?? null);
+
+    $featuredContentId = isset($data[0]['CONTENT_ID']) ? (string)$data[0]['CONTENT_ID'] : null;
+    $featured = $featuredContentId ? collect($data)->firstWhere('CONTENT_ID', $featuredContentId) : null;
+
+    $featured = is_array($featured) ? $featured :[];
+
     $featured['REVIEW_STARS'] = $featured['REVIEW_STARS'] ?? null;
     $featured['AGE_RATING']   = $featured['AGE_RATING']   ?? null;
     $featured['DESCRIPTION']  = $featured['DESCRIPTION']  ?? 'No description available.';
 
     $grouped = collect($data)->groupBy(fn($i) => strtolower(trim($i['CONTENT_TYPE'] ?? 'unknown')));
 
-    $top10 = collect($data)->take(10)->map(function ($item, $idx) {
-        $thumb   = $item['THUMBNAIL_PATH'] ?? null;
-        $source  = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-        $thumbUrl = asset('images/default.jpg');
+    
+    $customGenreMap = [
+        16 => 'Romance',
+        24 => 'Animated' 
+    ];
 
-        if ($thumb && preg_match('/\.(jpg|png)$/i', $thumb)) {
-            $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
-        } elseif ($source === 'youtube' && $thumb) {
-            $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
+    $groupedByGenres = [];
+
+foreach ($data as $item) {
+    $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
+
+    foreach ($genreIds as $id) {
+        $id = (int) trim($id);
+        if (isset($customGenreMap[$id])) {
+            $genreName = $customGenreMap[$id];
+            $groupedByGenres[$genreName][] = $item;
+        }
+    }
+}
+  
+
+    $top10 = collect($data)->sortByDesc(fn($i)=> (int)($i['VIEWS'] ?? 0))->take(10)->values()->map(function($item,$idx){
+       $thumb = $item['THUMBNAIL_PATH'] ?? null;
+       $source = strtolower($item['SOURCE'] ?? $item ['SOURCE_PATH'] ?? '' );
+       $thumbUrl = asset('images/default.jpg');
+
+        if($thumb && preg_match('/\.(jpg|png)$/i', $thumb)){
+            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+        }
+        elseif ($source === 'youtube' && $thumb){
+                $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
         }
 
-        return [
-            'rank'         => $idx + 1,
-            'title'        => $item['TITLE'] ?? 'Untitled',
-            'thumbnail_url'=> $thumbUrl,
-            'views'        => !empty($item['VIEWS']) ? $item['VIEWS'].' VIEWS' : '',
-            'content_id'   => $item['CONTENT_ID'] ?? null,
-        ];
-    })->toArray();
+        return[
 
-    /* -------------------------------------------------------------
-       2) progress info for the current user
-    ------------------------------------------------------------- */
+            'rank' => $idx + 1,
+            'title' => $item['TITLE'] ?? 'Untitled',
+            'thumbnail_url' => $thumbUrl,
+            'views' => !empty($item['VIEWS']) ? $item['VIEWS'] . ' VIEWS' : '',
+            'content_id' => $item['CONTENT_ID'] ?? null, 
+        ];
+
+    })->toArray();
     $userId = session('user_id');
 
     $watchHistory   = WatchHistory::where('user_id',$userId)
@@ -81,12 +114,15 @@ class PageController extends Controller
             $meta = $contentLookup[(string)$row->video_id] ?? null;
             if (!$meta) return null;          // skip unknown IDs
 
-            $thumb   = $meta['THUMBNAIL_PATH'] ?? null;
+            $thumb   = $meta['THUMBNAIL_PATH'] ?? $mets['IMAGE_PATH'] ?? null ;
+            if($thumb && preg_match('/\.(jpg|png)$/i', $thumb)){
+                $thumUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+            }
             $source  = strtolower($meta['SOURCE'] ?? $meta['SOURCE_PATH'] ?? '');
             $thumbUrl = asset('images/default.jpg');
 
             if ($thumb && preg_match('/\.(jpg|png)$/i',$thumb)) {
-                $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
+                $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
             } elseif ($source === 'youtube' && $thumb) {
                 $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
             }
@@ -101,10 +137,6 @@ class PageController extends Controller
         })
         ->filter()
         ->values();
-
-    /* -------------------------------------------------------------
-       4) view
-    ------------------------------------------------------------- */
     return view('welcome',[
         'featured'        => $featured,
         'grouped'         => $grouped,
@@ -115,6 +147,7 @@ class PageController extends Controller
         'watchHistory'    => $watchHistory,
         'watchDurations'  => $watchDurations,
         'continue'        => $continue,
+        'groupedByGenre'  => $groupedByGenres
     ]);
 }
 
@@ -127,7 +160,7 @@ class PageController extends Controller
 
     // 2️⃣ Filter only "Shows"
     $shows = $data->filter(function ($item) {
-        return $item['CONTENT_TYPE'] === 'Shows';
+        return is_array($item) && ($item['CONTENT_TYPE'] ?? null) === 'Shows';
     });
 
     // 3️⃣ Group Shows by genre names
@@ -155,7 +188,7 @@ class PageController extends Controller
 
     // 2️⃣ Filter only Movies
     $movies = $data->filter(function ($item) {
-        return $item['CONTENT_TYPE'] === 'Movies';
+        return is_array($item) && ($item['CONTENT_TYPE'] === 'Movies');
     });
 
     // 3️⃣ Group movies by genre names
@@ -184,7 +217,7 @@ class PageController extends Controller
 
     // 2️⃣ Filter only Documentaries
     $documentaries = $data->filter(function ($item) {
-        return $item['CONTENT_TYPE'] === 'Documentaries';
+        return is_array($item) && ($item['CONTENT_TYPE'] === 'Documentaries');
     });
 
     // 3️⃣ Group Documentaries by genre names
@@ -204,12 +237,31 @@ class PageController extends Controller
     return view('documentaries', ['sections' => $sections]);
 }
 
+        public function webseries()
+        {
+            $data = collect(seeprime_api(['select_id'=> 'select_content', 'admin_portal' => 'N']));
+            $genres = collect(seeprime_api(['select_id'=> 'select_genres', 'admin_portal' => 'Y']));
+
+            $webSeries = $data->filter(function($item){
+                return trim(strtolower($item['CONTENT_TYPE'] ?? '')) === 'web series';
+            });
+
+            $sections = [];
+            foreach($webSeries as $item){
+                $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
+                $genreNames = collect($genreIds)
+                ->map(fn($id)=> trim($id))
+                ->map(fn($id)=> $genres->firstWhere('GENRE_ID',$id)['NAME'] ?? 'other')
+                ->unique();
+
+                foreach ($genreNames as $genreName){
+                    $sections[$genreName][] = $item;
+                }
+            }
 
 
-    public function webseries()
-    {
-        return view('webseries');
-    }
+            return view('webseries',['sections' => $sections]);
+        }
 
     public function new()
     {
@@ -283,6 +335,31 @@ class PageController extends Controller
             ->toArray();
         $genreName = implode(', ', $genreNames);
 
+        $related = [];
+
+if (!empty($genreNames)) {
+    // You can use the first genre or loop through multiple
+    
+if (!empty($genreIds)) {
+    $genreIdCsv = implode(',', $genreIds);
+
+    $apiRelated = seeprime_api([
+        'select_id' => 'select_content',
+        'genre_id' => $genreIdCsv,
+        'admin_portal' => 'N'
+    ]);
+
+    $related = is_array($apiRelated)
+        ? collect($apiRelated)
+            ->where('CONTENT_ID', '!=', (string)$id)
+            ->unique('CONTENT_ID') // optional: avoid duplicates
+            ->take(12)
+            ->values()
+        : collect();
+}
+
+
+}
         if (
             isset($metaContent['IS_PREMIUM']) &&
             $metaContent['IS_PREMIUM'] === 'Y' &&
@@ -314,8 +391,24 @@ class PageController extends Controller
             $video['AGE_RATING'] = $video['AGE_RATING'] ?? $metaContent['AGE_RATING'] ?? null;
             $video['TITLE'] = $video['TITLE'] ?? $metaContent['TITLE'] ?? 'Untitled';
             $video['DESCRIPTION'] = $video['DESCRIPTION'] ?? $metaContent['DESCRIPTION'] ?? 'No description available';
-            $video['SOURCE'] = $selected['SOURCE_PATH'] ?? $selected['SOURCE'] ?? $meta['SOURCE_PATH'] ?? $meta['SOURCE'] ?? '';
-            $video['THUMBNAIL_PATH'] = $selected['THUMBNAIL_PATH'] ?? $meta['THUMBNAIL_PATH'] ?? '';
+            if(!empty($selected['SOURCE_PATH']) &&
+                !str_contains($selected['SOURCE_PATH'], 'teaser') &&
+                ! str_contains($selected['SOURCE_PATH'], 'trailer') &&
+                !in_array($selected['SOURCE_PATH'], [$selected['TRAILER'], $selected['TEASER']])
+            ){
+                $video['SOURCE'] = $selected['SOURCE_PATH'];
+            }else{
+                $video['SOURCE'] = '';
+            }
+            $video['IMAGE_PATH'] = $selected['IMAGE_PATH'] ?? $meta['IMAGE_PATH'] ?? '';
+            $video['BANNER_PATH'] = $metaContent['BANNER_PATH'] ?? null;
+            // Handle Trailer and Teaser for multipart
+            $video['TRAILER'] = $selected['TRAILER'] ?? $meta['TRAILER'] ?? null;
+            $video['TEASER']  = $selected['TEASER'] ?? $meta['TEASER'] ?? null;
+
+            $video['TRAILER_EXT'] = strtolower(pathinfo($video['TRAILER'], PATHINFO_EXTENSION));
+            $video['TEASER_EXT']  = strtolower(pathinfo($video['TEASER'], PATHINFO_EXTENSION));
+
 
             $episodesBySeason = collect($episodes)
                 ->groupBy('SEASON')
@@ -332,6 +425,11 @@ class PageController extends Controller
             $video['TITLE'] = $video['TITLE'] ?? $metaContent['TITLE'] ?? 'Untitled';
             $video['DESCRIPTION'] = $video['DESCRIPTION'] ?? $metaContent['DESCRIPTION'] ?? 'No description available';
             $video['SOURCE'] = $video['SOURCE_PATH'] ?? $video['SOURCE'] ?? '';
+            $video['TRAILER'] = $video['TRAILER'] ?? $raw['TRAILER'] ?? '';
+            $video['TEASER'] = $video['TEASER'] ?? $raw['TEASER'] ?? '';
+
+            $video['TRAILER_EXT'] = strtolower(pathinfo($video['TRAILER'], PATHINFO_EXTENSION));
+            $video['TEASER_EXT']  = strtolower(pathinfo($video['TEASER'], PATHINFO_EXTENSION)); 
             $video['EXT'] = strtolower(pathinfo($video['SOURCE'], PATHINFO_EXTENSION));
             $video['EXT'] = strtolower(pathinfo($video['SOURCE'], PATHINFO_EXTENSION));
             $video['MIME_TYPE'] = match($video['EXT']) {
@@ -343,7 +441,8 @@ class PageController extends Controller
             };
 
 
-            $video['THUMBNAIL_PATH'] = $video['THUMBNAIL_PATH'] ?? '';
+            $video['IMAGE_PATH'] = $video['IMAGE_PATH'] ?? '';
+            $video['BANNER_PATH'] = $metaContent['BANNER_PATH'] ?? null;
             $episodesBySeason = collect();
             $selectedSeason = 1;
         }
@@ -355,8 +454,31 @@ class PageController extends Controller
             $video['SOURCE_TYPE'] = 'video';
         }
 
+
+        if(!empty($video['TRAILER']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['TRAILER'])) {
+            $video['TRAILER_TYPE'] = 'youtube';
+            $video['TRAILER_YOUTUBE_ID'] = $video['TRAILER']; 
+        }   
+        elseif(preg_match('/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w\-]{11})/',$video['TRAILER'],$matches)){
+            $video['TRAILER_TYPE'] = 'youtube';
+            $video['TRAILER_YOUTUBE_ID'] = $matches[1];
+        }
+        else{
+                $video['TRAILER_TYPE'] ='video';
+        }
+
+    if (!empty($video['TEASER']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['TEASER'])) {
+        $video['TEASER_TYPE'] = 'youtube';
+        $video['TEASER_YOUTUBE_ID'] = $video['TEASER'];
+    } elseif (preg_match('/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w\-]{11})/', $video['TEASER'], $matches)) {
+        $video['TEASER_TYPE'] = 'youtube';
+        $video['TEASER_YOUTUBE_ID'] = $matches[1];
+    } else {
+        $video['TEASER_TYPE'] = 'video';
+}      
+
         // Cast API (non-standard endpoint, not SELECT.php)
-        $castUrl = "http://15.184.102.5:8443/Seeprime/apis/select.php?select_id=select_content_casts&content_id={$id}&admin_portal=N";
+        $castUrl = seeprime_url("apis/select.php")."?select_id=select_content_casts&content_id={$id}&admin_portal=N";
         $castResponse = Http::get($castUrl);
         $casts = $castResponse->successful() ? $castResponse->json() : [];
 
@@ -376,18 +498,33 @@ class PageController extends Controller
         ];
 
         $inMyList = false;
-        if (session()->has('user_id')) {
-            $inMyList = MyList::where('user_id', session('user_id'))
+        if (session()->has('user_id') && isset($video['CONTENT_ID'])) {
+    $inMyList = MyList::where('user_id', session('user_id'))
                       ->where('content_id', $video['CONTENT_ID'])
                       ->exists();
-        }
-
+}
+        try {
+        $video['CONTENT_ID'] = $metaContent['CONTENT_ID'] ?? (string)$id;
          $watch = WatchHistory::where('user_id', session('user_id'))
     ->where('content_id', $video['CONTENT_ID'])
     ->first();
     $watched = $watch->watched ?? 0;
+    $watched = request()->get('resume', $watched); // ✅ Override if ?resume= passed
     $duration = $watch->duration ?? 1;
     $progressPercent = round(min(100, ($watched / max($duration, 1)) * 100), 1);
+}
+
+catch (\Throwable $e){
+
+    Log::error('Watchhistory error in playvideo()',[
+        'user_id' => session('user_id'),
+        'content_id' => $video['CONTENT_ID'] ?? null,
+        'exception' => $e->getMessage()
+    ]);
+    $watched = 0;
+    $progressPercent = 0;
+        // return redirect('/welcome')->with('toast','video progress could not be loaded');
+}
 
         return view('play', [
             'video' => $video,
@@ -400,7 +537,8 @@ class PageController extends Controller
             'seasons' => array_keys($episodesBySeason->toArray()),
             'inMyList' => $inMyList,
             'progressPercent' => $progressPercent,
-            'watched' => $watched
+            'watched' => $watched,
+            'related' => $related
 
         ]);
 
@@ -424,8 +562,15 @@ class PageController extends Controller
     // 🔍 Filter by title or description
     $results = $data->filter(function ($item) use ($query) {
         return str_contains(strtolower($item['TITLE'] ?? ''), strtolower($query)) ||
-               str_contains(strtolower($item['DESCRIPTION'] ?? ''), strtolower($query));
+               str_contains(strtolower($item['DESCRIPTION'] ?? ''), strtolower($query)) ||
+               str_contains(strtolower($item['CONTENT_TYPE'] ?? ''), strtolower($query)) ||
+               str_contains(strtolower($item['GENERE_DESCRIPTIONS']?? ''), strtolower($query))||
+               str_contains(strtolower($item['CAST_DESCRIPTIONS']?? '') , strtolower($query));
     });
+
+    if($results->isEmpty()){
+        $results = $data->shuffle()->take(12);
+    }
 
     return view('search-results', [
         'results' => $results,

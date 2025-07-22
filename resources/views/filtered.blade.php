@@ -13,8 +13,8 @@
                 $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
                 $thumbUrl = '';
 
-                if ($thumb && str_ends_with($thumb, '.jpg')) {
-                    $thumbUrl = "http://15.184.102.5:8443/SeePrime/Content/Images/{$thumb}";
+                if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+                    $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
                 } elseif ($source === 'youtube' && $thumb) {
                     $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
                 } else {
@@ -22,7 +22,7 @@
                 }
             @endphp
 
-            <div style="width: 160px;">
+            <div style="width: 200px height: 500px;">
                 <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}" class="text-decoration-none text-light">
                     <div class="position-relative">
                         <img src="{{ $thumbUrl }}" class="rounded w-100 shadow" alt="{{ $item['TITLE'] }}">
