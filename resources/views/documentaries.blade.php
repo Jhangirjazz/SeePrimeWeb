@@ -18,18 +18,11 @@ From nature and history to social issues and science, uncover thought-provoking 
         <div class="slider-wrapper position-relative w-100">
             <div class="scroll-container">
                 @foreach ($items as $item)
-                    @php
-                        $thumb = $item['THUMBNAIL_PATH'] ?? null;
-                        $title = $item['TITLE'] ?? 'Untitled';
-                        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-                        $thumbUrl = asset('images/default.jpg');
+@php
+    $title = $item['TITLE'] ?? 'Untitled';
+    $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
+@endphp
 
-                        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
-                        } elseif ($source === 'youtube' && $thumb) {
-                            $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                        }
-                    @endphp
 
                     <div class="content-card me-3">
                         <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}">

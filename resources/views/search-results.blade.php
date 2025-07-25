@@ -13,20 +13,7 @@
         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
             <div class="card bg-dark text-white border-0 shadow-sm h-100">
                 @php
-                    $thumb = $video['THUMBNAIL_PATH'] ?? null;
-                    $source = strtolower($video['SOURCE'] ?? $video['SOURCE_PATH'] ?? '');
-                    $thumbUrl = asset('images/default.jpg');
-
-                    if ($source === 'youtube' && $thumb && str_contains($thumb, 'youtube.com')) {
-                        parse_str(parse_url($thumb, PHP_URL_QUERY), $ytParams);
-                        $thumb = $ytParams['v'] ?? $thumb;
-                    }
-
-                    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
-                    } elseif ($source === 'youtube' && $thumb) {
-                        $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                    }
+                        $thumbUrl = $video['thumb_url'] ?? asset('images/default.jpg');
                 @endphp
 
                 <img 

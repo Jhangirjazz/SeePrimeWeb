@@ -71,7 +71,7 @@
             $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
 
             if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                $thumbUrl = seeprime_url("Content/Images/Banners/{$thumb}");
+                $thumbUrl = seeprime_url("Content/Images/Banners/{$thumb}",'asset');
             } else {
                 $thumbUrl = asset('images/default.jpg');
             }
@@ -83,7 +83,7 @@
 
             $longDesc = $detail['DESCRIPTION'] ?? $shortDesc;
             $videoPath = $detail['SOURCE_PATH'] ?? null;
-            $trailerUrl = $videoPath ? seeprime_url("Content/Videos/{$videoPath}") : '#';
+            $trailerUrl = $videoPath ? seeprime_url("Content/Videos/{$videoPath}",'asset') : '#';
         @endphp
 
         <div class="hero-banner-single" style="
@@ -277,7 +277,7 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
                         $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
                         $thumbUrl = '';
                         if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+                            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
                         }
                     @endphp
             @if ($thumbUrl)
@@ -350,7 +350,7 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
                     $thumbUrl = asset('images/default.jpg');
 
                     if ($thumb && preg_match('/\.(jpg|png)$/i', $thumb)) {
-                        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+                        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
                     } elseif ($source === 'youtube' && $thumb) {
                         $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
                     }
@@ -375,8 +375,11 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
 
 {{--Top 10 Section--}}
 @php
-    $bannerImage = $top10[2]['thumbnail_url'] ?? asset('images/default.jpg');
+    $bannerImage = (!empty($top10) && isset($top10[2]['thumbnail_url']))
+        ? $top10[2]['thumbnail_url']
+        : asset('images/default.jpg');
 @endphp
+
             <div class="trending-banner position-relative text-white py-5"
      style="background: linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0.4)),
             url('{{ $bannerImage }}') center center / cover no-repeat;">
@@ -385,6 +388,22 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
        <p class="lead">Most watched this week by viewers like you.</p>
     </div>
     <div id="top10-scroll-inner" class="px-5 d-flex align-items-end overflow-auto pb-4">
+        @php
+    $thumb = $item['THUMBNAIL_PATH'] ?? null;
+    $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+    $thumbUrl = asset('images/default.jpg');
+
+    if ($thumb && preg_match('/\.(jpg|png|jpeg|webp)$/i', $thumb)) {
+        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+    } elseif ($source === 'youtube' && $thumb) {
+        if (str_contains($thumb, 'youtube')) {
+            parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+            $thumb = $ytparams['v'] ?? $thumb;
+        }
+        $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
+    }
+@endphp
+
        @foreach ($top10 as $item)
        <div class="top10-card">
             <span class="rank-number">{{ $item['rank'] }}</span>
@@ -438,20 +457,7 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
     <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}">
         <div class="thumbnail-wrapper">
             @php
-                $thumb = $item['THUMBNAIL_PATH'] ?? null;
-                $source = strtolower($item['SOURCE'] ?? $item ['SOURCE_PATH'] ?? '' );
-                $thumbUrl = asset('images/default.jpg');
-
-                if ($thumb && preg_match('/\.(jpg|png)$/i', $thumb)){
-                    $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");                    
-                }
-                elseif ($source === 'youtube' && $thumb) {
-                    if (str_contains($thumb,'youtube')) {
-                        parse_str(parse_url($thumb,PHP_URL_QUERY),$ytparams);
-                        $thumb = $ytparams['v'] ?? $thumb;
-                    }
-                    $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                }
+                $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
             @endphp
 
     <img src="{{ $thumbUrl }}"
@@ -461,7 +467,6 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
         <p class="text-white text-center mt-2 small fw-bold">{{ $item['TITLE'] }}</p>
     </a>
 </div>
-
                     @endforeach
                 </div>
                 <div class="scroll-controls">
@@ -478,9 +483,6 @@ $routeUrl = isset($routeMap[$routeName]) ? url('/'. $routeMap[$routeName]): '#';
         @endforeach
     </div>       
     @endif
-
-    
-
 @endsection
 
 @push('scripts')

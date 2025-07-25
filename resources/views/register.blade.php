@@ -5,7 +5,7 @@
   <title>Register - SeePrime</title>
   <link rel="stylesheet" href="{{ asset('css/register.css') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://js.stripe.com/v3/"></script>
+  {{-- <script src="https://js.stripe.com/v3/"></script> --}}
 </head>
 @if ($errors->any())
   <div class="alert alert-danger">
@@ -119,7 +119,7 @@
         </div>
 
         <!-- Step 2 -->
-        <div class="form-step" id="step-2">
+        {{-- <div class="form-step" id="step-2">
           <h3 class="mb-3">Payment Details</h3>
 
           <div class="mb-3">
@@ -145,7 +145,7 @@
             <button type="button" class="back-btn" onclick="prevStep()">Back</button>
             <button type="submit" class="continue-btn btn btn-danger">Pay & Register</button>
           </div>
-        </div>
+        </div> --}}
       </form>
       @if ($errors->has('register_error'))
   <div class="alert alert-danger">{{ $errors->first('register_error') }}</div>
@@ -195,22 +195,22 @@ document.getElementById('cnic').addEventListener('input', function () {
   }
  this.value = formatted;
 });
-const stripe = Stripe('pk_test_51Nxxx...'); // Replace with real publishable key
-const elements = stripe.elements();
-const cardElement = elements.create('card', {
-  style: {
-    base: {
-      color: '#333',
-      fontSize: '14px',
-      '::placeholder': { color: '#aaa' },
-    },
-  },
-});
-cardElement.mount('#card-element');
+// const stripe = Stripe('pk_test_51Nxxx...'); // Replace with real publishable key
+// const elements = stripe.elements();
+// const cardElement = elements.create('card', {
+//   style: {
+//     base: {
+//       color: '#333',
+//       fontSize: '14px',
+//       '::placeholder': { color: '#aaa' },
+//     },
+//   },
+// });
+// cardElement.mount('#card-element');
 
-cardElement.on('change', function (event) {
-  document.getElementById('card-errors').textContent = event.error ? event.error.message : '';
-});
+// cardElement.on('change', function (event) {
+//   document.getElementById('card-errors').textContent = event.error ? event.error.message : '';
+// });
 
 const form = document.getElementById('registration-form');
 // Step logic
@@ -248,41 +248,45 @@ function validateUserDetails() {
     return;
   }
 
-  if (accountType === 'free') {
-    form.submit(); // Directly register free user
-  } else {
-    nextStep(); // Show payment step for prime user
-  }
+  form.submit();
+
+  // if (accountType === 'free') {
+  //   form.submit(); // Directly register free user
+  // } else {
+  //   nextStep(); // Show payment step for prime user
+  // }
 }
-form.addEventListener('submit', async (event) => {
-  const accountType = document.getElementById('account_type').value;
 
-  if (accountType === 'prime') {
-    event.preventDefault();
-    const { token, error } = await stripe.createToken(cardElement);
 
-    if (error) {
-      document.getElementById('card-errors').textContent = error.message;
-    } else {
-      // Append Stripe token to form
-      const tokenInput = document.createElement('input');
-      tokenInput.type = 'hidden';
-      tokenInput.name = 'stripeToken';
-      tokenInput.value = token.id;
-      form.appendChild(tokenInput);
+// form.addEventListener('submit', async (event) => {
+//   const accountType = document.getElementById('account_type').value; 
 
-      // Append account type as hidden input (in case it's not sent)
-      const accTypeInput = document.createElement('input');
-      accTypeInput.type = 'hidden';
-      accTypeInput.name = 'account_type';
-      accTypeInput.value = 'prime';
-      form.appendChild(accTypeInput);
+//   if (accountType === 'prime') {
+//     event.preventDefault();
+//     const { token, error } = await stripe.createToken(cardElement);
 
-      // Submit the form
-      form.submit();
-    }
-  }
-});
+//     if (error) {
+//       document.getElementById('card-errors').textContent = error.message;
+//     } else {
+//       // Append Stripe token to form
+//       const tokenInput = document.createElement('input');
+//       tokenInput.type = 'hidden';
+//       tokenInput.name = 'stripeToken';
+//       tokenInput.value = token.id;
+//       form.appendChild(tokenInput);
+
+//       // Append account type as hidden input (in case it's not sent)
+//       const accTypeInput = document.createElement('input');
+//       accTypeInput.type = 'hidden';
+//       accTypeInput.name = 'account_type';
+//       accTypeInput.value = 'prime';
+//       form.appendChild(accTypeInput);
+
+//       // Submit the form
+//       form.submit();
+//     }
+//   }
+// });
 
 
 

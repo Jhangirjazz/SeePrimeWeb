@@ -9,20 +9,10 @@
     <div class="d-flex flex-wrap gap-3">
         @forelse ($content as $item)
             @php
-                $thumb = $item['THUMBNAIL_PATH'] ?? null;
-                $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-                $thumbUrl = '';
-
-                if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                    $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
-                } elseif ($source === 'youtube' && $thumb) {
-                    $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                } else {
-                    $thumbUrl = asset('images/default.jpg');
-                }
+                $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
             @endphp
 
-            <div style="width: 200px height: 500px;">
+            <div style="width: 200px; height: 500px;">
                 <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}" class="text-decoration-none text-light">
                     <div class="position-relative">
                         <img src="{{ $thumbUrl }}" class="rounded w-100 shadow" alt="{{ $item['TITLE'] }}">

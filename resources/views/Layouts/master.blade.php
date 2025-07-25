@@ -84,14 +84,23 @@
 
   <!-- Logout / Profile -->
   @if(session()->has('user_id'))
-    <a href="{{ url('/logout') }}" class="btn btn-danger btn-sm d-flex align-items-center">Logout</a>
-  @else
-    <a href="{{ url('/') }}" class="text-white">
-      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
-        <i class="bi bi-person-circle"></i>
-      </div>
+  @if(session('subscription_state') === 'PRIME MEMBER')
+    <a href="{{ route('profiles.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center">
+      <i class="fas fa-user-circle me-1"></i> Manage Profiles
     </a>
   @endif
+
+  <a href="{{ url('/logout') }}" class="btn btn-danger btn-sm d-flex align-items-center ms-2">
+    Logout
+  </a>
+@else
+  <a href="{{ url('/') }}" class="text-white">
+    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
+      <i class="bi bi-person-circle"></i>
+    </div>
+  </a>
+@endif
+
 
 </div>
 

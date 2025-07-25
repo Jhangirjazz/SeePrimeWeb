@@ -7,9 +7,8 @@
     <div class="px-4 pb-3">
         <h2 class="text-white fw-bold display-5 mb-1">Movies</h2>
         <p class="text-light mb-4">Browse our movie collection —<br> action, comedy, thrillers and more.
-Dive into a world of captivating stories, blockbuster hits, and timeless classics from every genre.</p>
+        Dive into a world of captivating stories, blockbuster hits, and timeless classics from every genre.</p>
     </div>
-
 
     @foreach ($sections as $genre => $items)
     <div class="category-section mb-2 bg-black py-3 px-2 rounded">
@@ -20,16 +19,8 @@ Dive into a world of captivating stories, blockbuster hits, and timeless classic
             <div class="scroll-container">
                 @foreach ($items as $item)
                     @php
-                        $thumb = $item['THUMBNAIL_PATH'] ?? null;
                         $title = $item['TITLE'] ?? 'Untitled';
-                        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-                        $thumbUrl = asset('images/default.jpg');
-
-                        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
-                        } elseif ($source === 'youtube' && $thumb) {
-                            $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                        }
+                        $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
                     @endphp
                     <div class="content-card me-3">
                         <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}">
@@ -57,12 +48,13 @@ Dive into a world of captivating stories, blockbuster hits, and timeless classic
     @endforeach
 </div>
 @endsection
+
 <script>
-    function scrollSlider(button,amount){
+    function scrollSlider(button, amount) {
         const scrollContainer = button.closest('.slider-wrapper').querySelector('.scroll-container');
         scrollContainer.scrollBy({
-            left : amount,
-            behavior : 'smooth'
+            left: amount,
+            behavior: 'smooth'
         });
     }
 </script>

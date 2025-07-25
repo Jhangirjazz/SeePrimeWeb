@@ -25,16 +25,8 @@ Dive into a world of captivating stories, blockbuster hits, and timeless classic
             <div class="scroll-container">
                 @foreach ($items as $item)
                     @php
-                        $thumb = $item['THUMBNAIL_PATH'] ?? null;
                         $title = $item['TITLE'] ?? 'Untitled';
-                        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-                        $thumbUrl = '';
-                        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
-                        }else {
-                                $thumbUrl = asset('images/default.jpg');
-                        }
-
+                        $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
                         $isComingSoon = !empty($item['STATE']) && $item['STATE'] === 'COMING SOON';
                         $href = $isComingSoon
                             ? "javascript:void(0);"

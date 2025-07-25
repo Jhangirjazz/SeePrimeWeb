@@ -10,15 +10,7 @@
         <div class="row">
             @foreach ($content as $item)
                 @php
-                    $thumb = $item['THUMBNAIL_PATH'] ?? null;
-                    $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
-                    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                        $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
-                    } elseif ($source === 'youtube' && $thumb) {
-                        $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
-                    } else {
-                        $thumbUrl = asset('images/default.jpg');
-                    }
+                    $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
                 @endphp
 
                 <div class="col-md-3 col-sm-6 mb-4">

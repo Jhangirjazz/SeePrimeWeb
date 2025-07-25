@@ -61,7 +61,8 @@ foreach ($data as $item) {
         $id = (int) trim($id);
         if (isset($customGenreMap[$id])) {
             $genreName = $customGenreMap[$id];
-            $groupedByGenres[$genreName][] = $item;
+            // $groupedByGenres[$genreName][] = $item;
+            $groupedByGenres[$genreName][] = $this->processThumbnail($item);
         }
     }
 }
@@ -73,7 +74,7 @@ foreach ($data as $item) {
        $thumbUrl = asset('images/default.jpg');
 
         if($thumb && preg_match('/\.(jpg|png)$/i', $thumb)){
-            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
         }
         elseif ($source === 'youtube' && $thumb){
                 $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
@@ -114,15 +115,15 @@ foreach ($data as $item) {
             $meta = $contentLookup[(string)$row->video_id] ?? null;
             if (!$meta) return null;          // skip unknown IDs
 
-            $thumb   = $meta['THUMBNAIL_PATH'] ?? $mets['IMAGE_PATH'] ?? null ;
+            $thumb   = $meta['THUMBNAIL_PATH'] ?? $meta['IMAGE_PATH'] ?? null ;
             if($thumb && preg_match('/\.(jpg|png)$/i', $thumb)){
-                $thumUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+                $thumUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
             }
             $source  = strtolower($meta['SOURCE'] ?? $meta['SOURCE_PATH'] ?? '');
             $thumbUrl = asset('images/default.jpg');
 
             if ($thumb && preg_match('/\.(jpg|png)$/i',$thumb)) {
-                $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+                $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
             } elseif ($source === 'youtube' && $thumb) {
                 $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
             }
@@ -151,24 +152,44 @@ foreach ($data as $item) {
     ]);
 }
 
-
-    public function shows()
+public function shows()
 {
-    // 1️⃣ Fetch content and genres using the global API helper
     $data   = collect(seeprime_api(['select_id' => 'select_content', 'admin_portal' => 'Y']));
     $genres = collect(seeprime_api(['select_id' => 'select_genres', 'admin_portal' => 'N']));
 
-    // 2️⃣ Filter only "Shows"
-    $shows = $data->filter(function ($item) {
-        return is_array($item) && ($item['CONTENT_TYPE'] ?? null) === 'Shows';
+    // Filter only Shows
+    $shows = $data->filter(fn($item) => is_array($item) && ($item['CONTENT_TYPE'] ?? null) === 'Shows');
+
+    // Add thumb_url to each show
+    $shows = $shows->transform(function ($item) {
+        $thumb = $item['THUMBNAIL_PATH'] ?? null;
+        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+        $thumbUrl = asset('images/default.jpg');
+
+        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+            $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+        } elseif ($source === 'youtube' && $thumb) {
+            if (str_contains($thumb, 'youtube.com')) {
+                parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+                $ytid = $ytparams['v'] ?? null;
+            } else {
+                $ytid = $thumb;
+            }
+            if ($ytid) {
+                $thumbUrl = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+            }
+        }
+
+        $item['thumb_url'] = $thumbUrl;
+        return $item;
     });
 
-    // 3️⃣ Group Shows by genre names
+    // Group Shows by genre name
     $sections = [];
     foreach ($shows as $item) {
         $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
         $genreNames = collect($genreIds)
-            ->map(fn($id) => trim($id))
+            ->map(fn($id) => (int) trim($id))
             ->map(fn($id) => $genres->firstWhere('GENRE_ID', $id)['NAME'] ?? 'Other')
             ->unique();
 
@@ -180,23 +201,45 @@ foreach ($data as $item) {
     return view('shows', ['sections' => $sections]);
 }
 
-   public function movies()
+
+public function movies()
 {
-    // 1️⃣ Fetch content and genres using the helper
     $data   = collect(seeprime_api(['select_id' => 'select_content', 'admin_portal' => 'Y']));
     $genres = collect(seeprime_api(['select_id' => 'select_genres', 'admin_portal' => 'N']));
 
-    // 2️⃣ Filter only Movies
-    $movies = $data->filter(function ($item) {
-        return is_array($item) && ($item['CONTENT_TYPE'] === 'Movies');
-    });
+    // Filter only Movies
+    $movies = $data->filter(fn($item) => is_array($item) && ($item['CONTENT_TYPE'] ?? null) === 'Movies');
 
-    // 3️⃣ Group movies by genre names
+    // Add thumb_url to each movie
+ $movies = $movies->map(function ($item) {
+    $thumb = $item['THUMBNAIL_PATH'] ?? null;
+    $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+
+    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+        $item['thumb_url'] = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+    } elseif ($source === 'youtube' && $thumb) {
+        if (str_contains($thumb, 'youtube')) {
+            parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+            $ytid = $ytparams['v'] ?? $thumb;
+        } else {
+            $ytid = $thumb;
+        }
+        $item['thumb_url'] = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+    } else {
+        $item['thumb_url'] = asset('images/default.jpg');
+    }
+
+    return $item;
+});
+
+
+
+    // Group by genre names
     $sections = [];
     foreach ($movies as $item) {
         $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
         $genreNames = collect($genreIds)
-            ->map(fn($id) => trim($id))
+            ->map(fn($id) => (int) trim($id))
             ->map(fn($id) => $genres->firstWhere('GENRE_ID', $id)['NAME'] ?? 'Other')
             ->unique();
 
@@ -209,18 +252,39 @@ foreach ($data as $item) {
 }
 
 
- public function documentaries()
+public function documentaries()
 {
-    // 1️⃣ Fetch content and genres using the helper
     $data   = collect(seeprime_api(['select_id' => 'select_content', 'admin_portal' => 'Y']));
     $genres = collect(seeprime_api(['select_id' => 'select_genres', 'admin_portal' => 'N']));
-
-    // 2️⃣ Filter only Documentaries
+    // dd($data->pluck('CONTENT_TYPE')->unique());
+    // Filter only Documentaries
     $documentaries = $data->filter(function ($item) {
-        return is_array($item) && ($item['CONTENT_TYPE'] === 'Documentaries');
+        return is_array($item) && ($item['CONTENT_TYPE'] === 'Documentries');
     });
 
-    // 3️⃣ Group Documentaries by genre names
+    // Add thumb_url like in movies()
+    $documentaries = $documentaries->map(function ($item) {
+        $thumb = $item['THUMBNAIL_PATH'] ?? null;
+        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+
+        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+            $item['thumb_url'] = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+        } elseif ($source === 'youtube' && $thumb) {
+            if (str_contains($thumb, 'youtube')) {
+                parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+                $ytid = $ytparams['v'] ?? $thumb;
+            } else {
+                $ytid = $thumb;
+            }
+            $item['thumb_url'] = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+        } else {
+            $item['thumb_url'] = asset('images/default.jpg');
+        }
+
+        return $item;
+    });
+
+    // Group by genre names
     $sections = [];
     foreach ($documentaries as $item) {
         $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
@@ -233,60 +297,105 @@ foreach ($data as $item) {
             $sections[$genreName][] = $item;
         }
     }
-
+        // dd($sections);
     return view('documentaries', ['sections' => $sections]);
 }
 
-        public function webseries()
-        {
-            $data = collect(seeprime_api(['select_id'=> 'select_content', 'admin_portal' => 'N']));
-            $genres = collect(seeprime_api(['select_id'=> 'select_genres', 'admin_portal' => 'Y']));
+public function webseries()
+{
+    $data = collect(seeprime_api(['select_id'=> 'select_content', 'admin_portal' => 'N']));
+    $genres = collect(seeprime_api(['select_id'=> 'select_genres', 'admin_portal' => 'Y']));
 
-            $webSeries = $data->filter(function($item){
-                return trim(strtolower($item['CONTENT_TYPE'] ?? '')) === 'web series';
-            });
+    $webSeries = $data->filter(function($item){
+        return trim(strtolower($item['CONTENT_TYPE'] ?? '')) === 'web series';
+    });
 
-            $sections = [];
-            foreach($webSeries as $item){
-                $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
-                $genreNames = collect($genreIds)
-                ->map(fn($id)=> trim($id))
-                ->map(fn($id)=> $genres->firstWhere('GENRE_ID',$id)['NAME'] ?? 'other')
-                ->unique();
+    $webSeries = $webSeries->map(function ($item) {
+        $thumb = $item['THUMBNAIL_PATH'] ?? null;
+        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
 
-                foreach ($genreNames as $genreName){
-                    $sections[$genreName][] = $item;
-                }
+        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+            $item['thumb_url'] = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+        } elseif ($source === 'youtube' && $thumb) {
+            if (str_contains($thumb, 'youtube')) {
+                parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+                $ytid = $ytparams['v'] ?? $thumb;
+            } else {
+                $ytid = $thumb;
             }
-
-
-            return view('webseries',['sections' => $sections]);
+            $item['thumb_url'] = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+        } else {
+            $item['thumb_url'] = asset('images/default.jpg');
         }
+
+        return $item;
+    });
+
+    $sections = [];
+    foreach ($webSeries as $item) {
+        $genreIds = explode(',', $item['GENRE_IDS'] ?? '');
+        $genreNames = collect($genreIds)
+            ->map(fn($id) => trim($id))
+            ->map(fn($id) => $genres->firstWhere('GENRE_ID', $id)['NAME'] ?? 'other')
+            ->unique();
+
+        foreach ($genreNames as $genreName){
+            $sections[$genreName][] = $item;
+        }
+    }
+
+    return view('webseries', [
+        'sections' => $sections,
+        'watchHistory' => [],       // Populate later
+        'watchDurations' => [],     // Populate later
+    ]);
+}
+
 
     public function new()
     {
         return view('new');
     }
 
-    public function mylist()
+   public function mylist()
 {
     $userId = session('user_id');
 
-    // Step 1: Fetch all content_ids for this user from SQLite
     $list = MyList::where('user_id', $userId)->pluck('content_id');
 
     if ($list->isEmpty()) {
         return view('mylist', ['content' => []]);
     }
 
-    // Step 2: Use the global API helper to fetch content
     $allContent = collect(seeprime_api(['select_id' => 'select_content', 'admin_portal' => 'Y']));
 
-    // Step 3: Filter the content from API based on IDs in list
     $filtered = $allContent->whereIn('CONTENT_ID', $list);
+
+    // 🔧 Add thumbnail URL processing here
+    $filtered = $filtered->map(function ($item) {
+        $thumb = $item['THUMBNAIL_PATH'] ?? null;
+        $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+
+        if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+            $item['thumb_url'] = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+        } elseif ($source === 'youtube' && $thumb) {
+            if (str_contains($thumb, 'youtube')) {
+                parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+                $ytid = $ytparams['v'] ?? $thumb;
+            } else {
+                $ytid = $thumb;
+            }
+            $item['thumb_url'] = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+        } else {
+            $item['thumb_url'] = asset('images/default.jpg');
+        }
+
+        return $item;
+    });
 
     return view('mylist', ['content' => $filtered]);
 }
+
 
     
     public function playVideo($id, $partId = null)
@@ -431,7 +540,6 @@ if (!empty($genreIds)) {
             $video['TRAILER_EXT'] = strtolower(pathinfo($video['TRAILER'], PATHINFO_EXTENSION));
             $video['TEASER_EXT']  = strtolower(pathinfo($video['TEASER'], PATHINFO_EXTENSION)); 
             $video['EXT'] = strtolower(pathinfo($video['SOURCE'], PATHINFO_EXTENSION));
-            $video['EXT'] = strtolower(pathinfo($video['SOURCE'], PATHINFO_EXTENSION));
             $video['MIME_TYPE'] = match($video['EXT']) {
                 'mp4' => 'video/mp4',
                 'webm' => 'video/webm',
@@ -446,13 +554,17 @@ if (!empty($genreIds)) {
             $episodesBySeason = collect();
             $selectedSeason = 1;
         }
-
-        if (!empty($video['SOURCE']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['SOURCE'])) {
-            $video['SOURCE_TYPE'] = 'youtube';
-            $video['YOUTUBE_ID'] = $video['SOURCE'];
-        } else {
-            $video['SOURCE_TYPE'] = 'video';
-        }
+if (!empty($video['SOURCE'])) {
+    if (preg_match('/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w\-]{11})/', $video['SOURCE'], $matches)) {
+        $video['SOURCE_TYPE'] = 'youtube';
+        $video['YOUTUBE_ID'] = $matches[1];
+    } elseif (preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['SOURCE'])) {
+        $video['SOURCE_TYPE'] = 'youtube';
+        $video['YOUTUBE_ID'] = $video['SOURCE'];
+    } else {
+        $video['SOURCE_TYPE'] = 'video';
+    }
+}
 
 
         if(!empty($video['TRAILER']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $video['TRAILER'])) {
@@ -525,6 +637,11 @@ catch (\Throwable $e){
     $progressPercent = 0;
         // return redirect('/welcome')->with('toast','video progress could not be loaded');
 }
+// dd([
+//     'SOURCE' => $video['SOURCE'] ?? null,
+//     'SOURCE_TYPE' => $video['SOURCE_TYPE'] ?? null,
+//     'Final URL' => seeprime_url("Content/Videos/{$video['SOURCE']}"),
+// ]);
 
         return view('play', [
             'video' => $video,
@@ -572,31 +689,51 @@ catch (\Throwable $e){
         $results = $data->shuffle()->take(12);
     }
 
-    return view('search-results', [
+    $results = $results->map(function ($item) {
+    $thumb = $item['THUMBNAIL_PATH'] ?? null;
+    $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+
+    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+        $item['thumb_url'] = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
+    } elseif ($source === 'youtube' && $thumb) {
+        if (str_contains($thumb, 'youtube')) {
+            parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+            $ytid = $ytparams['v'] ?? $thumb;
+        } else {
+            $ytid = $thumb;
+        }
+        $item['thumb_url'] = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+    } else {
+        $item['thumb_url'] = asset('images/default.jpg');
+    }
+
+    return $item;
+});
+
+      return view('search-results', [
         'results' => $results,
         'query'   => $query,
     ]);
-}
 
+}
 
 public function filterByCategory($id)
 {
-    $data = seeprime_api([
+    $data = collect(seeprime_api([
         'select_id' => 'select_content',
         'category_id' => $id,
         'admin_portal' => 'Y'
-    ]);
+    ]));
 
-    // ✅ Make sure $data is a list, not an error message
-    if (!isset($data[0]['CONTENT_ID'])) {
-        $data = []; // force it to be an empty list
-    }
+    $data = $data->map(fn($item) => $this->processThumbnail($item));
 
     return view('filtered', [
         'content' => $data,
         'filterType' => 'Category'
     ]);
 }
+
+
 
 public function filterByGenre($id)
 {
@@ -606,9 +743,9 @@ public function filterByGenre($id)
         'admin_portal' => 'Y'
     ]);
 
-    if (!isset($data[0]['CONTENT_ID'])) {
-        $data = [];
-    }
+    $data = isset($data[0]['CONTENT_ID']) ? collect($data) : collect([]);
+
+    $data = $data->map(fn($item) => $this->processThumbnail($item));
 
     return view('filtered', [
         'content' => $data,
@@ -617,22 +754,10 @@ public function filterByGenre($id)
 }
 
 
+
 public function showProfiles()
 {
-    if (session('subscription_state') !== 'PRIME MEMBER') {
-        return redirect('/welcome')->with('toast', 'Only Prime Members can access profiles.');
-    }
-
-    // Fake profiles for now — later connect to DB or API
-    $profiles = [
-        ['name' => 'DH', 'image' => 'zombiewar.jpg'],
-        ['name' => 'Alan', 'image' => 'default2.png'],
-        ['name' => 'Sam', 'image' => 'default3.png'],
-        ['name' => 'John', 'image' => 'default4.png'],
-        ['name' => 'Adult', 'image' => 'default5.png'],
-    ];
-
-    return view('profiles', ['profiles' => $profiles]);
+    return redirect()->action([AuthController::class,'manageprofiles']);
 }
 
 public function multiFilter(Request $request)
@@ -640,26 +765,49 @@ public function multiFilter(Request $request)
     $categoryIds = explode(',', $request->input('categories', ''));
     $genreIds = explode(',', $request->input('genres', ''));
 
-    // ✅ Use global helper to fetch all content
     $data = collect(seeprime_api([
         'select_id' => 'select_content',
         'admin_portal' => 'Y'
     ]));
 
-    // ✅ Filter content based on category and genre
     $filtered = $data->filter(function ($item) use ($categoryIds, $genreIds) {
         $matchCategory = empty($categoryIds[0]) || in_array($item['CATEGORY_ID'], $categoryIds);
-
         $itemGenres = explode(',', $item['GENRE_IDS'] ?? '');
         $matchGenre = empty($genreIds[0]) || count(array_intersect($itemGenres, $genreIds)) > 0;
-
         return $matchCategory && $matchGenre;
-    });
+    })->map(fn($item) => $this->processThumbnail($item));
 
     return view('filtered', [
         'content' => $filtered,
         'filterType' => 'Multi-Filter',
     ]);
+}
+
+
+private function processThumbnail(array $item): array
+{
+    $thumb = $item['THUMBNAIL_PATH'] ?? null;
+    $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
+
+    if ($thumb && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+        $thumb = ltrim(str_replace(['\\', '//'], '/', $thumb), '/');
+        if (!str_starts_with($thumb, 'Content/Images/Thumbnails')) {
+            $thumb = "Content/Images/Thumbnails/{$thumb}";
+        }
+        $item['thumb_url'] = seeprime_url($thumb, 'asset');
+    } elseif ($source === 'youtube' && $thumb) {
+        if (str_contains($thumb, 'youtube')) {
+            parse_str(parse_url($thumb, PHP_URL_QUERY), $ytparams);
+            $ytid = $ytparams['v'] ?? $thumb;
+        } else {
+            $ytid = $thumb;
+        }
+        $item['thumb_url'] = "https://img.youtube.com/vi/{$ytid}/maxresdefault.jpg";
+    } else {
+        $item['thumb_url'] = asset('images/default.jpg');
+    }
+
+    return $item;
 }
 
 

@@ -67,19 +67,25 @@
 
     <!-- === VIDEO PLAYER === -->
     @php
-        $sourceUrl =  seeprime_url("Content/Videos/{$video['SOURCE']}");
-        // $thumbUrl = seeprime_url("Content/Images/Thumbnails/" . ($video['THUMBNAIL_PATH'] ?? 'default.jpg'));
-        $bannerPath = $video['BANNER_PATH'] ?? null;
-        $thumbUrl = $bannerPath ? seeprime_url("Content/Images/Banners/{$bannerPath}") : asset('images/default.jpg'); 
-        $ext = strtolower(pathinfo($video['SOURCE'], PATHINFO_EXTENSION));
-        $mimeType = match($ext) {
-            'mp4' => 'video/mp4',
-            'webm' => 'video/webm',
-            'ogg' => 'video/ogg',
-            'mkv' => 'video/x-matroska',
-            default => 'video/mp4'
-        };
-    @endphp
+    $isYouTube = !empty($video['SOURCE_TYPE']) && $video['SOURCE_TYPE'] === 'youtube';
+
+    $sourceUrl = $isYouTube
+        ? "https://www.youtube.com/embed/" . ($video['YOUTUBE_ID'] ?? $video['SOURCE']) . "?origin=" . request()->getHost()
+        : seeprime_url("Content/Videos/{$video['SOURCE']}", 'asset');
+
+    $bannerPath = $video['BANNER_PATH'] ?? null;
+    $thumbUrl = $bannerPath ? seeprime_url("Content/Images/Banners/{$bannerPath}", 'asset') : asset('images/default.jpg'); 
+
+    $ext = strtolower(pathinfo($video['SOURCE'], PATHINFO_EXTENSION));
+    $mimeType = match($ext) {
+        'mp4' => 'video/mp4',
+        'webm' => 'video/webm',
+        'ogg' => 'video/ogg',
+        'mkv' => 'video/x-matroska',
+        default => 'video/mp4'
+    };
+@endphp
+
 
     {{-- <div class="video-player mb-4"> --}}
         <div id="videoWrapper" class="video-player mb-4 position-relative" style="position: relative;">
@@ -255,7 +261,7 @@
 
                 // Build thumbnail URL
                 if (!empty($thumb) && preg_match('/\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                    $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}");
+                    $thumbUrl = seeprime_url("Content/Images/Thumbnails/{$thumb}", 'asset');
                 } else {
                     $thumbUrl = asset('images/default.jpg');
                 }
@@ -327,7 +333,7 @@
             poster="{{$thumbUrl ?? asset('images/default.jpg')}}"
             class="w-100 rounded shadow"
             style="max-height: 300px; object-fit: contain; background-color: black">
-            <source src="{{seeprime_url("Content/Videos/{$folder}/{$file}")}}" type="{{$type}}">
+            <source src="{{ seeprime_url("Content/Videos/{$folder}/{$file}", 'asset') }}" type="{{ $type }}">
                 Your Browser does not support this video format
             </video>
             @endif

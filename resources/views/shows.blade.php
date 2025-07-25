@@ -19,7 +19,14 @@ Discover our collection of gripping dramas, hilarious comedies, and heartwarming
         <div class="slider-wrapper position-relative w-100">
             <div class="scroll-container">
                 @foreach ($items as $item)
+                    
                     @php
+                        $title = $item['TITLE'] ?? 'Untitled';
+                        $thumbUrl = $item['thumb_url'] ?? asset('images/default.jpg');
+                    @endphp
+
+                
+                {{-- @php
                         $thumb = $item['THUMBNAIL_PATH'] ?? null;
                         $title = $item['TITLE'] ?? 'Untitled';
                         $source = strtolower($item['SOURCE'] ?? $item['SOURCE_PATH'] ?? '');
@@ -30,7 +37,7 @@ Discover our collection of gripping dramas, hilarious comedies, and heartwarming
                         } elseif ($source === 'youtube' && $thumb) {
                             $thumbUrl = "https://img.youtube.com/vi/{$thumb}/maxresdefault.jpg";
                         }
-                    @endphp
+                    @endphp --}}
                     <div class="content-card me-3">
                         <a href="{{ route('play.video', ['id' => $item['CONTENT_ID']]) }}">
                             <div class="thumbnail-wrapper position-relative">
